@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rastreamento Tozzo — Painel de Sensores (ao vivo)</title>
+<style>
+:root{
+  --bg:#FFFFFF; --panel:#FFFFFF; --panel2:#EAF4EE; --line:#CFE0D5;
+  --text:#10241A; --muted:#587065;
+  --ok:#009847; --warn:#B58900; --crit:#C62828; --accent:#007D3A; --lime:#C7D30A;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top,0px); padding-bottom: env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: light){/*tema padrao Tozzo*/
+  :root:not([data-theme="dark"]){--bg:#FFFFFF; --panel:#FFFFFF; --panel2:#EAF4EE; --line:#CFE0D5; --text:#10241A; --muted:#587065;}
+}
+:root[data-theme="light"]{--bg:#FFFFFF; --panel:#FFFFFF; --panel2:#EAF4EE; --line:#CFE0D5; --text:#10241A; --muted:#587065;}
+html{scroll-padding-top: env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.4;}
+header{padding:20px clamp(16px,4vw,40px) 16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;}
+header h1{font-size:1.15rem; margin:0; font-weight:650;}
+header p{margin:2px 0 0; color:var(--muted); font-size:.85rem;}
+.badge{background:var(--panel2); border:1px solid var(--line); border-radius:6px; padding:4px 10px; font-size:.78rem; color:var(--muted); display:flex; align-items:center; gap:6px;}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--ok);}
+.dot.stale{background:var(--warn);}
+.dot.off{background:var(--crit);}
+main{max-width:1180px; margin:0 auto; padding:20px clamp(16px,4vw,40px) 60px;}
+.banner{border-radius:8px; padding:12px 16px; font-size:.85rem; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;}
+.banner.info{background:rgba(11,94,59,.12); border:1px solid var(--accent); color:var(--text);}
+.banner.warn{background:rgba(217,154,61,.12); border:1px solid var(--warn); color:var(--text);}
+.banner.crit{background:rgba(209,84,74,.14); border:1px solid var(--crit); color:var(--text);}
+.banner button{background:var(--accent); color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:.78rem; cursor:pointer; font-weight:600;}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:22px;}
+.kpi{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 14px;}
+.kpi .n{font-size:1.5rem; font-weight:650;}
+.kpi .l{color:var(--muted); font-size:.75rem; margin-top:2px;}
+.kpi.crit .n{color:var(--crit);} .kpi.warn .n{color:var(--warn);} .kpi.ok .n{color:var(--ok);}
+.kpi.clickable{cursor:pointer; transition:border-color .15s;}
+.kpi.clickable:hover{border-color:var(--accent);}
+.kpi.active{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent);}
+.kpi.active .l{color:var(--text);}
+.kpi .l small{display:block; color:var(--accent); font-weight:600; margin-top:2px;}
+.controls{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+select, input[type=text]{background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:7px 10px; font-size:.82rem;}
+input[type=text]{flex:1; min-width:160px;}
+button.ghost{background:transparent; border:1px solid var(--line); color:var(--text); border-radius:6px; padding:7px 14px; font-size:.82rem; cursor:pointer;}
+section{margin-bottom:26px;}
+h2{font-size:.95rem; margin:0 0 10px; font-weight:650;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.grid3{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:16px;}
+.bar-row.mot{grid-template-columns:170px 1fr 34px;}
+@media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+.bars{display:flex; flex-direction:column; gap:7px;}
+.bar-row{display:grid; grid-template-columns:110px 1fr 34px; align-items:center; gap:8px; font-size:.78rem; cursor:pointer; padding:3px 6px; margin:0 -6px; border-radius:5px; transition:background .12s;}
+.bar-row:hover{background:var(--panel2);}
+.bar-row.active{background:rgba(11,94,59,.14); outline:1px solid var(--accent);}
+.bar-row span:first-child{overflow:hidden; text-overflow:ellipsis;}
+.bar-track{background:var(--panel2); border-radius:4px; height:9px; overflow:hidden;}
+.bar-fill{height:100%; background:var(--accent); border-radius:4px;}
+.bar-row.active .bar-fill{background:var(--crit);}
+.clear-filters{font-size:.76rem; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; text-decoration:underline;}
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:8px;}
+table{width:100%; border-collapse:collapse; font-size:.8rem; min-width:760px;}
+th,td{padding:8px 10px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap;}
+th{background:var(--panel2); color:var(--muted); font-weight:600; position:sticky; top:0;}
+td.plate{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;}
+.pill{display:inline-block; border-radius:20px; padding:2px 9px; font-size:.72rem; font-weight:600;}
+.pill.ok{background:rgba(63,156,109,.15); color:var(--ok);}
+.pill.warn{background:rgba(217,154,61,.15); color:var(--warn);}
+.pill.crit{background:rgba(209,84,74,.18); color:var(--crit);}
+.days.ok{color:var(--ok); font-weight:600;} .days.warn{color:var(--warn); font-weight:600;} .days.crit{color:var(--crit); font-weight:600;}
+tbody tr:hover{background:var(--panel2);}
+.skel{color:var(--muted); font-size:.85rem; padding:30px 0; text-align:center;}
+footer{color:var(--muted); font-size:.72rem; text-align:center; padding:20px 0 40px;}
+@media print{ .controls,.banner,button{display:none !important;} }
+
+header{background:linear-gradient(90deg,#052A18,#007D3A); color:#fff; border-bottom:4px solid var(--lime);}
+header h1{color:#fff;} header p{color:rgba(255,255,255,.85);}
+.badge{background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.35); color:#fff;}
+h2{color:var(--accent);}
+.kpi{border-top:3px solid var(--lime);}
+th{background:var(--panel2); color:var(--accent);}
+button.ghost:hover{background:var(--panel2); border-color:var(--accent);}
+select:focus,input[type=text]:focus{outline:2px solid var(--lime); border-color:var(--accent);}
+</style>
+<script src="../js/config.js"></script>
+<script src="../js/data-source.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/tozzo-theme.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>Rastreamento Tozzo — Central de Problemas de Sensores</h1>
+    <p>Conectado à planilha "Problema Sensor Rastreador" (Google Sheets)</p>
+  </div>
+  <span class="badge" id="statusBadge"><span class="dot off" id="statusDot"></span><span id="statusText">conectando...</span></span>
+</header>
+<main>
+  <div id="bannerArea"></div>
+  <section><div class="kpis" id="kpis"><div class="skel">Carregando dados da planilha...</div></div></section>
+  <section id="controlsSection" style="display:none">
+    <div class="controls">
+      <input type="text" id="search" placeholder="Buscar por placa ou motorista...">
+      <select id="fTipo"><option value="">Tipo · todos</option></select>
+      <select id="fGestor"><option value="">Gestor · todos</option></select>
+      <select id="fMotorista" title="Os 10 motoristas com mais registros na planilha"><option value="">Motorista · top 10</option></select>
+      <select id="fStatus"><option value="">Status · todos</option><option value="Pendente">Pendente</option><option value="Resolvido">Resolvido</option></select>
+      <button class="ghost" onclick="window.print()">Exportar / Imprimir</button>
+      <button class="ghost" id="refreshBtn">Atualizar agora</button>
+    </div>
+  </section>
+  <section id="chartsSection" style="display:none" class="grid3">
+    <div><h2>Problemas por tipo</h2><div class="bars" id="barsTipo"></div></div>
+    <div><h2>Placas reincidentes</h2><div class="bars" id="barsPlaca"></div></div>
+    <div><h2>Motoristas reincidentes</h2><div class="bars" id="barsMot"></div></div>
+  </section>
+  <section id="pieSection" style="display:none">
+    <h2 style="text-align:center">Problemas por sensor <span style="color:var(--muted); font-weight:400;">(%)</span></h2>
+    <div style="max-width:420px; height:360px; margin:0 auto;"><canvas id="pieSensor"></canvas></div>
+  </section>
+  <section id="monthlySection" style="display:none">
+    <h2>Problemas por mês <span style="color:var(--muted); font-weight:400;">· identificados x resolvidos · clique num ponto pra filtrar</span> <span id="monthFilterTag"></span></h2>
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; height:340px;"><canvas id="monthlyChart"></canvas></div>
+  </section>
+  <section id="spendSection" style="display:none">
+    <h2>Valor gasto por mês <span style="color:var(--muted); font-weight:400;">· pela data de resolução · clique num ponto pra filtrar</span> <span id="spendFilterTag"></span></h2>
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; height:340px;"><canvas id="spendChart"></canvas></div>
+  </section>
+  <section id="tableSection" style="display:none">
+    <h2>Registros <span id="countLabel" style="color:var(--muted); font-weight:400;"></span></h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Placa</th><th>Motorista</th><th>Problema</th><th>Gestor</th><th>Verificação</th><th>Resolução</th><th>Local</th><th>Valor</th><th>Dias</th><th>Status</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+  </section>
+  <footer>Fonte: Google Sheets (via API Apps Script) · atualiza automaticamente</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+let allRows = [];
+let criticalOnly = false;
+let monthFilter = null;
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function scrollToTable(){ document.getElementById('tableSection').scrollIntoView({behavior:'smooth', block:'start'}); }
+
+function parseDateBR(s){
+  if(!s) return null;
+  const t = String(s).trim();
+  let m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:[ T,]+\d{1,2}:\d{2}(?::\d{2})?)?$/);
+  if(!m){const iso = t.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T].*)?$/); if(iso) m = [null, iso[3], iso[2], iso[1]];}
+  if(!m) return null;
+  let [,d,mo,y] = m;
+  y = y.length===2 ? '20'+y : y;
+  const dt = new Date(Number(y), Number(mo)-1, Number(d));
+  if(isNaN(dt.getTime()) || dt.getFullYear()<2020 || dt.getFullYear()>2030) return null;
+  return dt;
+}
+function parseValor(s){
+  if(!s) return 0;
+  const clean = String(s).replace(/[^\d,]/g,'').replace(',', '.');
+  const n = parseFloat(clean);
+  return isNaN(n) ? 0 : n;
+}
+function b64ToUtf8(b64){
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+let semProblema=0;
+function parseCsv(base64){
+  semProblema=0;
+  const csvText = b64ToUtf8(base64);
+  const parsed = Papa.parse(csvText, {skipEmptyLines:true});
+  // acha a linha do cabeçalho (a que contém "Placa"); ignora linhas de título acima dela
+  let hi = parsed.data.findIndex(r=>r.some(c=>String(c==null?'':c).trim().toLowerCase()==='placa')); if(hi<0) hi=0;
+  const rows = parsed.data.slice(hi+1); // pula cabeçalho
+  const today = new Date();
+  // colunas localizadas pelo NOME do cabeçalho; se algum nome não for achado, mantém a posição antiga (0..8)
+  const nrm = x=>String(x==null?'':x).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  const H = (parsed.data[hi]||[]).map(nrm);
+  const ix = (test,dflt)=>{const j=H.findIndex(test); return j<0?dflt:j;};
+  const C = [ix(h=>h==='placa',0), ix(h=>h==='motorista',1), ix(h=>h==='problema',2), ix(h=>h==='gestor',3),
+             ix(h=>/^data verific/.test(h),4), ix(h=>/^data resol/.test(h),5), ix(h=>/^local/.test(h),6),
+             ix(h=>/^garantia/.test(h),7), ix(h=>h==='valor',8)];
+  return rows.map(cells0=>{
+    const cells = C.map(i=>cells0[i]);
+    const [placa,motorista,problema,gestor,dv,dr,local,garantia,valorRaw] = cells;
+    if(!placa || placa==='Placa') return null;
+    const verifDate = parseDateBR(dv);
+    const resolDate = parseDateBR(dr);
+    const valor = parseValor(valorRaw);
+    let status, dias;
+    if(resolDate){ status='Resolvido'; dias = verifDate ? Math.round((resolDate-verifDate)/86400000) : null; }
+    else { status='Pendente'; dias = verifDate ? Math.round((today-verifDate)/86400000) : null; }
+    if(!String(problema==null?'':problema).trim()){ semProblema++; return null; }   // problema em branco: não é contabilizado
+    return {placa, motorista:motorista||'—', problema:String(problema).trim(), gestor:gestor||'—',
+      dv:dv||'—', dr:dr||'—', local:(local&&local!=='-')?local:'—', valor, status, dias: dias===null?null:Math.max(dias,0)};
+  }).filter(Boolean);
+}
+
+function sevClass(d, status){
+  if(status==='Resolvido') return 'ok';
+  if(d===null) return 'warn';
+  if(d>50) return 'crit';
+  return 'warn';
+}
+function setStatus(cls, text){
+  // o selo só aparece quando algo foge do normal (atualizando, desconectado...); com dados em dia fica oculto
+  document.getElementById('statusDot').className = 'dot '+cls;
+  document.getElementById('statusText').textContent = cls==='ok' ? '' : text;
+  document.getElementById('statusBadge').style.display = cls==='ok' ? 'none' : '';
+}
+function showBanner(html){ document.getElementById('bannerArea').innerHTML = html; }
+function clearBanner(){ document.getElementById('bannerArea').innerHTML = ''; }
+
+function populateFilters(rows){
+  const fT=document.getElementById('fTipo'), fG=document.getElementById('fGestor');
+  const keepT=fT.value, keepG=fG.value;   // preserva a seleção atual quando os dados são atualizados
+  fT.innerHTML='<option value="">Tipo · todos</option>'; fG.innerHTML='<option value="">Gestor · todos</option>';
+  [...new Set(rows.map(r=>r.problema))].sort().forEach(t=>fT.insertAdjacentHTML('beforeend',`<option value="${t}">${t}</option>`));
+  [...new Set(rows.map(r=>r.gestor))].sort().forEach(g=>fG.insertAdjacentHTML('beforeend',`<option value="${g}">${g}</option>`));
+  fT.value=keepT; if(fT.value!==keepT) fT.value='';
+  // filtro de motorista: os 10 que mais aparecem (contagem sobre todos os registros da planilha)
+  const fM=document.getElementById('fMotorista'), keepM=fM.value, cnt={};
+  rows.forEach(r=>{ if(r.motorista && /[A-Za-zÀ-ÿ]/.test(r.motorista)) cnt[r.motorista]=(cnt[r.motorista]||0)+1; });
+  fM.innerHTML='<option value="">Motorista · top 10</option>';
+  Object.entries(cnt).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'pt-BR')).slice(0,10)
+    .forEach(([n,c])=>{ const o=document.createElement('option'); o.value=n; o.textContent=n+' ('+c+')'; fM.appendChild(o); });
+  fM.value=keepM; if(fM.value!==keepM) fM.value='';
+  fG.value=keepG; if(fG.value!==keepG) fG.value='';
+}
+function renderKpis(rows){
+  const pend = rows.filter(r=>r.status==='Pendente');
+  const resolv = rows.filter(r=>r.status==='Resolvido' && r.dias!==null);
+  const avgResol = resolv.length ? Math.round(resolv.reduce((s,r)=>s+r.dias,0)/resolv.length) : 0;
+  const totalValor = rows.reduce((s,r)=>s+r.valor,0);
+  const critCount = pend.filter(r=>r.dias!==null && r.dias>50).length;
+  const fStatus = document.getElementById('fStatus').value;
+  const pendActive = fStatus==='Pendente' && !criticalOnly;
+  const kpis=[
+    {n:rows.length,l:'Total de registros'},
+    {n:pend.length,l:'Pendentes',cls:'warn',id:'kpi-pend',active:pendActive},
+    {n:critCount,l:'Críticos (>50 dias)',cls:'crit',id:'kpi-crit',active:criticalOnly},
+    {n:avgResol+'d',l:'Tempo médio de resolução',cls:'ok'},
+    {n:'R$ '+totalValor.toLocaleString('pt-BR',{maximumFractionDigits:0}),l:'Valor gasto'},
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(k=>
+    `<div class="kpi ${k.cls||''} ${k.id?'clickable':''} ${k.active?'active':''}" ${k.id?`id="${k.id}"`:''}>
+      <div class="n">${k.n}</div><div class="l">${k.l}${k.active?'<small>filtrando · clique p/ limpar</small>':''}</div>
+    </div>`).join('');
+  const kp = document.getElementById('kpi-pend'); if(kp) kp.onclick = onPendClick;
+  const kc = document.getElementById('kpi-crit'); if(kc) kc.onclick = onCritClick;
+}
+function onPendClick(){
+  const fStatus = document.getElementById('fStatus');
+  if(fStatus.value==='Pendente' && !criticalOnly){ fStatus.value=''; }
+  else { fStatus.value='Pendente'; criticalOnly=false; }
+  applyFilters(); scrollToTable();
+}
+function onCritClick(){
+  if(criticalOnly){ criticalOnly=false; }
+  else { criticalOnly=true; document.getElementById('fStatus').value='Pendente'; }
+  applyFilters(); scrollToTable();
+}
+function renderBars(rows){
+  const curTipo = document.getElementById('fTipo').value;
+  const curSearch = document.getElementById('search').value.trim();
+  const byTipo={}; rows.forEach(r=>byTipo[r.problema]=(byTipo[r.problema]||0)+1);
+  const maxT=Math.max(...Object.values(byTipo),1);
+  document.getElementById('barsTipo').innerHTML = Object.entries(byTipo).sort((a,b)=>b[1]-a[1]).slice(0,8)
+    .map(([t,c])=>`<div class="bar-row ${t===curTipo?'active':''}" data-tipo="${esc(t)}"><span>${esc(t)}</span><div class="bar-track"><div class="bar-fill" style="width:${c/maxT*100}%"></div></div><span>${c}</span></div>`).join('') || '<span style="color:var(--muted)">Sem dados</span>';
+  const byPlaca={}; rows.forEach(r=>byPlaca[r.placa]=(byPlaca[r.placa]||0)+1);
+  const rec=Object.entries(byPlaca).filter(([,c])=>c>1).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxP=Math.max(...rec.map(r=>r[1]),1);
+  document.getElementById('barsPlaca').innerHTML = rec.length ? rec.map(([p,c])=>`<div class="bar-row ${p===curSearch?'active':''}" data-placa="${esc(p)}"><span class="days crit" style="font-family:ui-monospace,monospace">${esc(p)}</span><div class="bar-track"><div class="bar-fill" style="width:${c/maxP*100}%; background:var(--crit)"></div></div><span>${c}</span></div>`).join('') : '<span style="color:var(--muted)">Nenhuma placa reincidente</span>';
+  document.querySelectorAll('#barsTipo .bar-row').forEach(el=>el.onclick=()=>{
+    const t = el.dataset.tipo, fT=document.getElementById('fTipo');
+    fT.value = (fT.value===t) ? '' : t;
+    applyFilters(); scrollToTable();
+  });
+  // Motoristas reincidentes: os 10 que mais aparecem (mais de 1 registro), com a quantidade ao lado
+  const byMot={}; rows.forEach(r=>{ if(r.motorista && /[A-Za-zÀ-ÿ]/.test(r.motorista)) byMot[r.motorista]=(byMot[r.motorista]||0)+1; });
+  const recM=Object.entries(byMot).filter(([,c])=>c>1).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'pt-BR')).slice(0,10);
+  const maxM=Math.max(...recM.map(r=>r[1]),1);
+  document.getElementById('barsMot').innerHTML = recM.length ? recM.map(([m,c])=>`<div class="bar-row mot ${m===curSearch?'active':''}" data-mot="${esc(m)}"><span title="${esc(m)}">${esc(m)}</span><div class="bar-track"><div class="bar-fill" style="width:${c/maxM*100}%; background:var(--crit)"></div></div><span>${c}</span></div>`).join('') : '<span style="color:var(--muted)">Nenhum motorista reincidente</span>';
+  document.querySelectorAll('#barsMot .bar-row').forEach(el=>el.onclick=()=>{
+    const m = el.dataset.mot, s=document.getElementById('search');
+    s.value = (s.value===m) ? '' : m;
+    applyFilters(); scrollToTable();
+  });
+  document.querySelectorAll('#barsPlaca .bar-row').forEach(el=>el.onclick=()=>{
+    const p = el.dataset.placa, s=document.getElementById('search');
+    s.value = (s.value===p) ? '' : p;
+    applyFilters(); scrollToTable();
+  });
+}
+const PALETTE=['#0B5E3B','#2E7D4F','#A8D6A7','#4FA36B','#145A32','#7DB98F','#3C9A66','#C9E6CC','#1F6F47','#6FBF8E','#8CC9A0','#B5DDB8'];
+function renderTable(allFilteredRows){
+  const rows = allFilteredRows.filter(r=>r.status==='Pendente');
+  document.getElementById('countLabel').textContent = `· ${rows.length} pendentes/críticos (de ${allFilteredRows.length} filtrados)`;
+  document.getElementById('tbody').innerHTML = rows.slice(0,400).map(r=>{
+    const sev=sevClass(r.dias,r.status);
+    return `<tr><td class="plate">${r.placa}</td><td>${r.motorista}</td><td>${r.problema}</td><td>${r.gestor}</td><td>${r.dv}</td><td>${r.dr}</td><td>${r.local}</td>
+      <td>${r.valor? 'R$ '+r.valor.toLocaleString('pt-BR') : '—'}</td><td class="days ${sev}">${r.dias===null?'—':r.dias}</td>
+      <td><span class="pill ${sev}">${sev==='crit'?'Crítico':r.status}</span></td></tr>`;
+  }).join('') || `<tr><td colspan="10" style="text-align:center; color:var(--muted); padding:20px;">Nenhum pendente/crítico nesse filtro</td></tr>`;
+}
+let pieSensorChart=null, monthlyChart=null, spendChart=null;
+function chartTextColor(){ return getComputedStyle(document.body).getPropertyValue('--text').trim() || '#1F2A24'; }
+function chartMuted(){ return getComputedStyle(document.body).getPropertyValue('--muted').trim() || '#6B7A72'; }
+function chartLine(){ return getComputedStyle(document.body).getPropertyValue('--line').trim() || '#DCE8E0'; }
+
+function renderPies(rows){
+  const byTipo={}; rows.forEach(r=>byTipo[r.problema]=(byTipo[r.problema]||0)+1);
+  const tipoEntries = Object.entries(byTipo).sort((a,b)=>b[1]-a[1]);
+  const total = rows.length || 1;
+  const ctx1 = document.getElementById('pieSensor');
+  if(pieSensorChart) pieSensorChart.destroy();
+  pieSensorChart = new Chart(ctx1, {
+    type:'pie',
+    data:{ labels: tipoEntries.map(([t])=>t), datasets:[{ data: tipoEntries.map(([,c])=>c), backgroundColor: tipoEntries.map((_,i)=>PALETTE[i%PALETTE.length]), borderColor: chartLine(), borderWidth:1 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color: chartTextColor(), boxWidth:11, font:{size:10.5} } },
+      tooltip:{ callbacks:{ label:(c)=>`${c.label}: ${c.raw} (${(c.raw/total*100).toFixed(1)}%)` } } } }
+  });
+}
+
+function monthKey(d){ return d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : null; }
+function monthLabel(key){
+  const [y,m] = key.split('-');
+  const meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  return `${meses[Number(m)-1]}/${y.slice(2)}`;
+}
+function renderMonthly(rows){
+  const tagEl = document.getElementById('monthFilterTag');
+  tagEl.innerHTML = monthFilter ? `<span class="pill" style="background:rgba(11,94,59,.15); color:var(--accent);">filtrando ${monthLabel(monthFilter)} <button class="clear-filters" onclick="monthFilter=null; applyFilters();" style="color:var(--accent); margin-left:4px;">×</button></span>` : '';
+  const abertos={}, resolvidos={};
+  rows.forEach(r=>{
+    const vd = parseDateBR(r.dv); const rd = parseDateBR(r.dr);
+    if(vd){ const k=monthKey(vd); abertos[k]=(abertos[k]||0)+1; }
+    if(rd){ const k=monthKey(rd); resolvidos[k]=(resolvidos[k]||0)+1; }
+  });
+  const keys = [...new Set([...Object.keys(abertos), ...Object.keys(resolvidos)])].sort();
+  const ctx = document.getElementById('monthlyChart');
+  if(monthlyChart) monthlyChart.destroy();
+  const ptRadius = keys.map(k=>k===monthFilter?7:3);
+  const ptBorder = keys.map(k=>k===monthFilter?3:1);
+  monthlyChart = new Chart(ctx, {
+    type:'line',
+    data:{ labels: keys.map(monthLabel), datasets:[
+      { label:'Problemas identificados', data: keys.map(k=>abertos[k]||0), borderColor:'#A8D6A7', backgroundColor:'#A8D6A7', tension:.25, pointRadius:ptRadius, pointBorderWidth:ptBorder, pointHoverRadius:8 },
+      { label:'Resolvidos', data: keys.map(k=>resolvidos[k]||0), borderColor:'#0B5E3B', backgroundColor:'#0B5E3B', tension:.25, pointRadius:ptRadius, pointBorderWidth:ptBorder, pointHoverRadius:8 },
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const k = keys[elements[0].index];
+        monthFilter = (monthFilter===k) ? null : k;
+        applyFilters(); scrollToTable();
+      }, onHover:(evt, elements)=>{ evt.native.target.style.cursor = elements.length ? 'pointer' : 'default'; },
+      scales:{
+        x:{ ticks:{ color: chartMuted() }, grid:{ color: chartLine() } },
+        y:{ beginAtZero:true, ticks:{ color: chartMuted(), precision:0 }, grid:{ color: chartLine() } } },
+      plugins:{ legend:{ position:'bottom', labels:{ color: chartTextColor(), boxWidth:11, font:{size:10.5} } } } }
+  });
+}
+
+function renderSpend(rows){
+  const tagEl = document.getElementById('spendFilterTag');
+  tagEl.innerHTML = monthFilter ? `<span class="pill" style="background:rgba(11,94,59,.15); color:var(--accent);">filtrando ${monthLabel(monthFilter)} <button class="clear-filters" onclick="monthFilter=null; applyFilters();" style="color:var(--accent); margin-left:4px;">×</button></span>` : '';
+  const gasto={};
+  rows.forEach(r=>{
+    const rd = parseDateBR(r.dr);
+    if(rd && r.valor>0){ const k=monthKey(rd); gasto[k]=(gasto[k]||0)+r.valor; }
+  });
+  const keys = Object.keys(gasto).sort();
+  const ctx = document.getElementById('spendChart');
+  if(spendChart) spendChart.destroy();
+  const ptRadius = keys.map(k=>k===monthFilter?7:3);
+  const ptBorder = keys.map(k=>k===monthFilter?3:1);
+  spendChart = new Chart(ctx, {
+    type:'line',
+    data:{ labels: keys.map(monthLabel), datasets:[
+      { label:'Valor gasto', data: keys.map(k=>gasto[k]), borderColor:'#0B5E3B', backgroundColor:'rgba(11,94,59,.15)', tension:.25, pointRadius:ptRadius, pointBorderWidth:ptBorder, pointHoverRadius:8, fill:true },
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, onClick:(evt, elements)=>{
+        if(!elements.length) return;
+        const k = keys[elements[0].index];
+        monthFilter = (monthFilter===k) ? null : k;
+        applyFilters(); scrollToTable();
+      }, onHover:(evt, elements)=>{ evt.native.target.style.cursor = elements.length ? 'pointer' : 'default'; },
+      scales:{
+        x:{ ticks:{ color: chartMuted() }, grid:{ color: chartLine() } },
+        y:{ beginAtZero:true, ticks:{ color: chartMuted(), callback:(v)=>'R$ '+v.toLocaleString('pt-BR') }, grid:{ color: chartLine() } } },
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:(c)=>'R$ '+c.raw.toLocaleString('pt-BR') } } } }
+  });
+}
+let hadRenderError = false;
+function safeRender(name, fn){
+  try{ fn(); } catch(e){
+    hadRenderError = true;
+    console.error('Falha em', name, e);
+    showBanner(`<div class="banner warn">Um bloco do painel (${name}) não renderizou: ${e.message}. O restante segue funcionando.</div>`);
+  }
+}
+function applyFilters(){
+  hadRenderError = false;
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const motor=document.getElementById('fMotorista').value, tipo=document.getElementById('fTipo').value, gestor=document.getElementById('fGestor').value, status=document.getElementById('fStatus').value;
+  const rows = allRows.filter(r=>
+    (!q||r.placa.toLowerCase().includes(q)||r.motorista.toLowerCase().includes(q))
+    &&(!motor||r.motorista===motor)&&(!tipo||r.problema===tipo)&&(!gestor||r.gestor===gestor)&&(!status||r.status===status)
+    &&(!criticalOnly||(r.status==='Pendente'&&r.dias!==null&&r.dias>50))
+    &&(!monthFilter||monthKey(parseDateBR(r.dv))===monthFilter||monthKey(parseDateBR(r.dr))===monthFilter)
+  );
+  safeRender('KPIs', ()=>renderKpis(rows));
+  safeRender('Barras', ()=>renderBars(rows));
+  safeRender('Gráficos de pizza', ()=>renderPies(rows));
+  safeRender('Gráfico mensal', ()=>renderMonthly(rows));
+  safeRender('Gráfico de gasto mensal', ()=>renderSpend(rows));
+  safeRender('Tabela', ()=>renderTable(rows));
+}
+['search','fTipo','fGestor','fMotorista','fStatus'].forEach(id=>document.getElementById(id).addEventListener('input', applyFilters));
+
+function renderData(base64Content, cache){
+  allRows = parseCsv(base64Content);
+  populateFilters(allRows);
+  document.getElementById('controlsSection').style.display='block';
+  document.getElementById('chartsSection').style.display='grid';
+  document.getElementById('pieSection').style.display='block';
+  document.getElementById('monthlySection').style.display='block';
+  document.getElementById('spendSection').style.display='block';
+  document.getElementById('tableSection').style.display='block';
+  applyFilters();
+  const stale = cache && cache.revalidating;
+  setStatus(stale?'stale':'ok', stale ? 'atualizando...' : ('ao vivo · '+new Date().toLocaleTimeString('pt-BR')));
+  if(!hadRenderError) clearBanner();
+}
+
+function renderError(err){
+  setStatus('off','desconectado');
+  document.getElementById('kpis').innerHTML='';
+  if(err.code==='needs_reauth'){
+    showBanner(`<div class="banner crit">Sua conexão com o Google Drive expirou. Reconecte para o painel voltar a atualizar. <button onclick="location.reload()">Recarregar</button></div>`);
+  } else if(err.code==='server_not_connected'){
+    showBanner(`<div class="banner warn">O Google Drive não está conectado a este painel. Conecte-o nas configurações de conectores para ver os dados ao vivo.</div>`);
+  } else if(err.code==='blocked_by_policy'){
+    showBanner(`<div class="banner crit">O acesso a esta planilha foi bloqueado pela política da organização.</div>`);
+  } else if(err.retryable){
+    showBanner(`<div class="banner warn">Não consegui buscar os dados agora (instabilidade temporária). Tentando de novo automaticamente.</div>`);
+  } else {
+    showBanner(`<div class="banner crit">${err.message||'Não consegui carregar os dados da planilha.'} <button onclick="location.reload()">Recarregar</button></div>`);
+  }
+}
+
+function textToB64(t){const by=new TextEncoder().encode(t);let b='';for(let i=0;i<by.length;i++)b+=String.fromCharCode(by[i]);return btoa(b)}
+const hora=()=>new Date().toLocaleTimeString('pt-BR');
+/* Resumo p/ Página Inicial (somente leitura): problema com mais registros no período (data de verificação) */
+/* Pessoas p/ a aba Ranking (somente leitura): só registros com problema preenchido (os mesmos do painel). Gestor só vale no formato "Nome - (Supervisor)"; motorista em branco/sem letras não entra. */
+let VER=0;
+window.TozzoPessoas=function(v){
+  if(!allRows.length)return{pronto:false};if(v===VER)return{pronto:true,same:true,ver:VER};
+  const iso=d=>d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'';
+  const G=[],M=[];
+  for(const r of allRows){const d=iso(parseDateBR(r.dv));
+    const m=String(r.motorista||'').trim();if(m&&m!=='—'&&/[A-Za-zÀ-ÿ]/.test(m)&&!/\d/.test(m))M.push({n:m,d,w:1});
+    const g=/^(.+?)\s*-\s*\(.+\)\s*$/.exec(String(r.gestor||'').trim());if(g)G.push({n:g[1].trim(),d,w:1})}
+  return{pronto:true,ver:VER,gestor:G,motorista:M};
+};
+window.TozzoResumo=function(ini,fim){
+  if(!allRows.length)return{pronto:false};
+  const iso=d=>d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'';
+  const m={};let tot=0,mn='',mx='';
+  for(const r of allRows){const k=iso(parseDateBR(r.dv));
+    if(k){if(!mn||k<mn)mn=k;if(!mx||k>mx)mx=k}
+    if((ini||fim)&&(!k||(ini&&k<ini)||(fim&&k>fim)))continue;
+    m[r.problema]=(m[r.problema]||0)+1;tot++}
+  const t=Object.entries(m).sort((x,y)=>y[1]-x[1]||x[0].localeCompare(y[0],'pt-BR'))[0];
+  return{pronto:true,vazio:!t,nome:t?t[0]:'',valor:t?t[1]:0,total:tot,min:mn,max:mx,nota:'data de verificação'};
+};
+TozzoData.start('sensores',{required:['placa','motorista','problema','gestor','data verific','data resol','local','garantia','valor'],warnBlank:['placa'],
+  onData:(text)=>{renderData(textToB64(text),null);VER++;setStatus('ok','');if(semProblema)console.info('[Tozzo] Sensores: '+semProblema+' registro(s) sem problema preenchido, não contados');}});
+document.getElementById('refreshBtn').addEventListener('click',()=>TozzoData.reload('sensores'));
+</script>
+</body>
+</html>

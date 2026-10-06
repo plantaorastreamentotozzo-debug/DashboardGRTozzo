@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard de Alertas — Gerenciamento de Risco</title>
+<style>
+:root{--bg:#FFFFFF;--card:#FFFFFF;--tx:#10241A;--mu:#587065;--bd:#CFE0D5;--ac:#007D3A;--ac2:#E6F3EB;--wr:#c62828;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="dark"]{--bg:#0e1420;--card:#172030;--tx:#e8edf6;--mu:#93a0b8;--bd:#263249;--ac:#5b9bff;--ac2:#1d2b45;--wr:#ff8a80}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1280px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+h1{font-size:20px;margin:0}h2{font-size:15px;margin:0 0 4px}
+.mu{color:var(--mu);font-size:12px}.sub{min-height:17px;margin-bottom:8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;min-width:0}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:12px}
+.filters label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mu)}
+input[type=date]{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px}
+button{font:inherit;border-radius:8px;padding:9px 16px;border:1px solid var(--ac);background:var(--ac);color:#fff;cursor:pointer}
+button.sec{background:transparent;color:var(--ac)}
+.chips{width:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{padding:4px 10px;border-radius:999px;font-size:12px;background:var(--ac2);color:var(--ac);border-color:transparent}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:12px}
+.kpi b{display:block;font-size:28px;line-height:1.2;margin-top:4px}.kpi b.t{font-size:17px;padding:6px 0}
+.click{cursor:pointer;transition:border-color .15s,box-shadow .15s}.click:hover,.click:focus-visible{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac2);outline:0}
+.hint{color:var(--ac);font-size:11px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:12px;margin-bottom:12px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:12px;margin-bottom:12px}
+.tb{overflow:auto;max-height:420px;margin-top:8px}
+table{width:100%;border-collapse:collapse}th,td{padding:7px 6px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}
+th{font-size:11px;color:var(--mu);text-transform:uppercase;position:sticky;top:0;background:var(--card)}
+.n{text-align:right;white-space:nowrap}td:first-child{color:var(--mu);width:28px}
+tr.row{cursor:pointer}tr.row:hover td,tr.sel td{background:var(--ac2)}
+.lb{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.lb i,.li i{width:10px;height:10px;border-radius:50%;flex:none}
+.badge{font-size:10px;color:var(--wr);border:1px solid var(--wr);border-radius:999px;padding:0 6px}
+.bar{height:4px;background:var(--ac2);border-radius:3px;margin-top:4px}.bar b{display:block;height:100%;background:var(--ac);border-radius:3px}
+.donrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}#cDon{width:200px;height:200px;flex:none;margin:0 auto}
+.leg{flex:1;min-width:150px;display:flex;flex-direction:column;gap:3px}
+.li{display:flex;gap:6px;align-items:center;cursor:pointer;padding:3px 6px;border-radius:6px;font-size:12px}.li:hover{background:var(--ac2)}.li span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sl{cursor:pointer;transition:opacity .15s}.sl:hover{opacity:.8}
+.tog{width:100%;margin-top:10px;text-align:left}
+#cDia{position:relative;height:280px;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:crosshair}
+#cDia svg{width:100%;height:100%;display:block}
+.tip{position:absolute;pointer-events:none;background:rgba(15,23,42,.95);color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;white-space:nowrap;z-index:2;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.tip b{font-size:14px}.tip span{color:#aab6cc}
+.flash{animation:fl 1.3s}@keyframes fl{0%{box-shadow:0 0 0 4px var(--ac)}100%{box-shadow:0 0 0 0 transparent}}
+#drop{border:2px dashed var(--bd);text-align:center;padding:28px 16px;cursor:pointer;margin-bottom:12px}
+#drop.on{border-color:var(--ac);background:var(--ac2)}
+#prog{height:6px;background:var(--ac2);border-radius:4px;margin-top:12px;overflow:hidden;display:none}#prog b{display:block;height:100%;width:0;background:var(--ac)}
+#err{color:var(--wr);margin-top:8px}
+.hide{display:none!important}
+header{background:linear-gradient(90deg,#052A18,#007D3A);color:#fff;border-bottom:4px solid #C7D30A;border-radius:12px;padding:14px 18px}header h1,header h2,header .mu,header small,header label{color:#fff}header .btn,header button{background:#C7D30A;color:#052A18;border-color:#C7D30A}header .btn.g,header button.sec{background:transparent;color:#fff;border:1px solid #fff}h2{color:#007D3A}.kpis .card{border-top:3px solid #C7D30A}th{color:#007D3A}input:focus{outline:2px solid #C7D30A}
+:root{--px:max(clamp(16px,4vw,40px),calc((100vw - 1180px)/2));}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:1rem;line-height:1.4}
+.wrap{max-width:none;padding:0 var(--px) 60px}
+header{margin:0 calc(-1*var(--px)) 20px;padding:20px var(--px) 16px;border-radius:0;border-bottom:4px solid #C7D30A}
+h1{font-size:1.15rem;font-weight:650}
+h2{font-size:.95rem;font-weight:650;margin:0 0 10px;color:var(--tx)}
+.mu{font-size:.75rem}
+.card{border-radius:8px;padding:12px 14px}
+.kpis{gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:22px}
+.kpi b{font-size:1.5rem;font-weight:650;margin-top:2px}
+.kpi b.t{font-size:1rem}
+.filters{gap:8px;margin-bottom:16px}
+.filters label{font-size:.75rem}
+input[type=date]{background:#FFFFFF;border-radius:6px;padding:7px 10px;font-size:.82rem}
+button{border-radius:6px;padding:7px 14px;font-size:.82rem;background:transparent;color:var(--tx);border:1px solid var(--bd)}
+button:hover{border-color:var(--ac)}
+header button{background:#C7D30A;color:#052A18;border-color:#C7D30A}
+header button.sec{background:transparent;color:#fff;border:1px solid #fff}
+.g2,.g3{gap:16px}
+.tb{border:1px solid var(--bd);border-radius:8px}
+th{background:#EAF4EE;color:var(--mu);font-size:.8rem;font-weight:600;text-transform:none}
+th,td{padding:8px 10px}
+td{font-size:.8rem}
+</style>
+<script src="../js/config.js"></script>
+<script src="../js/data-source.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/tozzo-theme.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>🚛 Dashboard de Alertas <span class="mu">— Gerenciamento de Risco</span></h1>
+  <span class="mu" id="status"></span>
+</header>
+
+<div id="drop" class="card hide">
+  <b>Atualizar dados:</b> arraste o CSV da aba “Página1” aqui ou clique para selecionar.<br>
+  <span class="mu">Processado só no seu navegador, nada é enviado.</span>
+  <div id="prog"><b></b></div><div id="err"></div>
+  <input id="file" type="file" accept=".csv,.tsv,.txt" hidden>
+</div>
+
+<div class="card filters">
+  <label>Data inicial<input type="date" id="dIni"></label>
+  <label>Data final<input type="date" id="dFim"></label>
+  <label>Ocorrência<select id="sT2"></select></label>
+  <label>Procedimento / operação<select id="sP2"></select></label>
+  <label>Embarcador<select id="sE2"></select></label>
+  <label>Motorista<input id="iM2" list="lM2" placeholder="Digite o nome" autocomplete="off"><datalist id="lM2"></datalist></label>
+  <button id="bAp">Aplicar</button>
+  <button id="bCl" class="sec">Limpar filtro</button>
+  <button id="bRf" class="sec" style="margin-left:auto">Atualizar dados</button>
+  <button id="bNew" class="sec">Carregar outro CSV</button>
+  <span class="mu" id="per" style="width:100%"></span>
+  <div class="chips" id="chips"></div>
+</div>
+
+<div class="kpis">
+  <div class="card kpi"><span class="mu">Total de Alertas</span><b id="k1">0</b></div>
+  <div class="card kpi"><span class="mu">Motoristas Envolvidos</span><b id="k2">0</b></div>
+  <div class="card kpi click" id="kc3" role="button" tabindex="0"><span class="mu">Procedimentos de Embarque</span><b id="k3">0</b><span class="hint" id="k3h"></span></div>
+  <div class="card kpi"><span class="mu">Motorista com Mais Alertas</span><b class="t" id="k5">—</b><span class="mu" id="k5s"></span></div>
+  <div class="card kpi click" id="kc4" role="button" tabindex="0"><span class="mu">Tipo de Alerta Mais Frequente</span><b class="t" id="k4">—</b><span class="mu" id="k4s"></span><br><span class="hint">ver maiores ofensores ▸</span></div>
+</div>
+
+<div class="g2">
+  <div class="card" id="pDon">
+    <h2>Procedimentos de Embarque — Distribuição</h2><div class="mu sub">Clique em uma fatia para filtrar os demais painéis</div>
+    <div class="donrow"><div id="cDon"></div><div class="leg" id="lDon"></div></div>
+    <button class="sec tog" id="bTog" aria-expanded="false"></button>
+    <div class="tb hide" id="tDon"></div>
+  </div>
+  <div class="card" id="pDia">
+    <h2>Comportamento dos Alertas no Período</h2><div class="mu sub" id="dInfo"></div>
+    <div id="cDia"><div class="tip hide" id="tip"></div></div>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card" id="pEmb"><h2>Alertas por Embarcador</h2><div class="mu sub" id="sE"></div><div id="tEmb"></div></div>
+  <div class="card" id="pEmbP"><h2>Procedimentos do Embarcador Selecionado</h2><div class="mu sub" id="sEP">Clique em um embarcador para ver como os alertas se dividem entre os procedimentos dele (frota, logístico, vazio…)</div><div id="tEmbP"></div></div>
+</div>
+
+<div class="g3" id="rowFil">
+  <div class="card" id="pTip"><h2>Tipos de Alerta — Top 10</h2><div class="mu sub" id="sT"></div><div id="tTip"></div></div>
+  <div class="card"><h2>Top 10 Procedimentos de Embarque — Maior Número de Alertas</h2><div class="mu sub" id="sP"></div><div id="tPro"></div></div>
+  <div class="card"><h2>Top 10 Motoristas — Maior Número de Alertas</h2><div class="mu sub" id="sM"></div><div id="tMot"></div></div>
+</div>
+</div>
+
+<script>
+const ALLOW=new Set(["VIOLACAO DE PAINEL","VIOLACAO DE BATERIA","PARADA NAO PERMITIDA","BOTAO DE PANICO","VIOLACAO DE ANTENA","VIOLACAO DE DESENGATE","DESVIO DE ROTA (VEICULO PARADO)","DESLOCAMENTO INDEVIDO","ENTRADA HORARIO PERNOITE","PERDA DE SINAL","VIOLACAO DE BAU","DESVIO DE ROTA","ACONTECIMENTOS CONJUGADOS","VELOCIDADE CRITICO","PARADA INDEVIDA","REINICIO NAO INFORMADO","PARADA NAO PROGRAMADA"]);
+const $=i=>document.getElementById(i),fmt=n=>n.toLocaleString('pt-BR'),pf=p=>p.toFixed(1).replace('.',',')+'%';
+const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cpfN=s=>{s=(s||'').replace(/\D/g,'');return s?s.padStart(11,'0'):''};
+const cpfF=c=>c.length==11?c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):c;
+const cleanN=s=>s.replace(/^(?:px\s*-\s*|[_+\s]+)+/i,'').replace(/\s+/g,' ').trim();
+const tick=()=>new Promise(r=>setTimeout(r));
+const dl=l=>[';','\t'].reduce((b,c)=>l.split(c).length>l.split(b).length?c:b,',');
+function split(l,D){if(l.indexOf('"')<0)return l.split(D);const o=[];let c='',q=false;for(let i=0;i<l.length;i++){const h=l[i];if(q){if(h=='"'){if(l[i+1]=='"'){c+='"';i++}else q=false}else c+=h}else if(h=='"')q=true;else if(h==D){o.push(c);c=''}else c+=h}o.push(c);return o}
+function pd(s){let m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(s);if(m)return Math.round(Date.UTC(+m[3],m[2]-1,+m[1])/864e5);m=/^(\d{1,2})\/(\d{1,2})\/(\d{2})(?!\d)/.exec(s);if(m)return Math.round(Date.UTC(2000+ +m[3],m[2]-1,+m[1])/864e5);m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);return m?Math.round(Date.UTC(+m[1],m[2]-1,+m[3])/864e5):-1}
+const ds=d=>new Date(d*864e5).toISOString().slice(0,10),br=d=>ds(d).split('-').reverse().join('/');
+const WD=['dom','seg','ter','qua','qui','sex','sáb'],wd=d=>WD[new Date(d*864e5).getUTCDay()];
+const col=id=>`hsl(${140+(id*7)%14},${34+(id*11)%22}%,${24+(id*23)%50}%)`;
+const bar=p=>{$('prog').style.display='block';$('prog').firstChild.style.width=(p*100)+'%'};
+let S;const F={p:null,t:null,m:null,b:null,e:null};let openProc=false,LC=null,drag=null;
+
+/* ---------- dados: cubo (dia × procedimento × tipo × motorista) ---------- */
+const b64=(s,T)=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new T(u.buffer)};
+function setEmb(D){S={names:D.names,procs:D.procs,tipos:D.tipos,cd:b64(D.d,Uint16Array),cp:b64(D.p,Uint8Array),ct:b64(D.t,Uint8Array),cm:b64(D.m,Uint16Array),cc:b64(D.c,Uint16Array),n:D.n,cols:D.cols,minD:D.minD,maxD:D.maxD}}
+function detect(H,rows){
+  const sc=Array(H.length).fill(0);
+  rows.forEach(r=>r.forEach((v,j)=>{if(/^\d{1,2}\/\d{1,2}\/\d{4}|^\d{4}-\d{2}-\d{2}/.test(v))sc[j]++}));
+  let d=-1,best=.5;
+  H.forEach((h,j)=>{const f=sc[j]/rows.length,s=f+(/DATA|DATE|GERA|HORA/.test(h)?.3:0);if(f>.5&&s>best){best=s;d=j}});
+  const f=re=>H.findIndex(h=>re.test(h));
+  let t=f(/^CONTROLE$/);if(t<0)t=f(/TIPO|ALERTA|CONTROLE/);
+  return{d,t,p:f(/PROCED|EMBARQ/),m:f(/MOTORISTA|NOME/),c:f(/CPF/),H};
+}
+async function loadCSV(f){
+  const INCLUI_NOVOS=!!(window.TOZZO_CONFIG||{}).GR_INCLUIR_TIPOS_NAO_RECONHECIDOS;
+  const A={rid:new Map(),rn:[],rk:new Map(),md:new Map(),mp:new Map(),mt:new Map(),names:[],procs:[],tipos:[],cube:new Map(),unk:new Map(),n:0,skip:0,mn:1e9,mx:-1e9};
+  let enc='utf-8';
+  try{new TextDecoder('utf-8',{fatal:true}).decode(new Uint8Array(await f.slice(0,65536).arrayBuffer()),{stream:true})}catch(e){enc='windows-1252'}
+  const rd=f.stream().getReader(),dec=new TextDecoder(enc);
+  let buf='',hdr=null,D,M=null,pend=[],read=0,k=0;
+  const gid=(m,a,x)=>{let i=m.get(x);if(i===undefined){i=a.length;a.push(x);m.set(x,i)}return i};
+  const add=r=>{const d=pd(r[M.d]||'');if(d<0){if(r[M.d]||r[M.t]||r[M.p])A.skip++;return}
+    let tp=(r[M.t]||'').trim();
+    if(!ALLOW.has(norm(tp))){
+      if(!tp)return;
+      const kk=norm(tp);A.unk.set(kk,[tp,(A.unk.get(kk)||[tp,0])[1]+1]);               // contabiliza o tipo novo
+      if(!INCLUI_NOVOS||A.tipos.length>=250)return;                                     // padrão: fica fora dos totais (regra dos 17 tipos), mas é avisado
+      tp='Tipo não reconhecido: '+tp}
+    const pr=(r[M.p]||'').trim()||'(sem procedimento)';
+    const c=M.c>=0?cpfN(r[M.c]):'';let nm=M.m>=0?cleanN(r[M.m]||''):'';if(/^CPF NAO ENCONTRADO/.test(norm(nm)))nm='CPF não encontrado · '+cpfF(c);
+    const key=norm(nm)||c||'?';let i=A.md.get(key);
+    if(i===undefined){i=A.names.length;A.names.push(nm||(c?cpfF(c):'(não identificado)'));A.md.set(key,i)}
+    A.n++;if(d<A.mn)A.mn=d;if(d>A.mx)A.mx=d;
+    {const rw=(r[M.m]||'').replace(/\s+/g,' ').trim();if(rw){let j=A.rid.get(rw);if(j===undefined){j=A.rn.length;A.rn.push(rw);A.rid.set(rw,j)}const rk=j*65536+d;A.rk.set(rk,(A.rk.get(rk)||0)+1)}}   // só p/ a aba Ranking: nome exatamente como está na planilha (com PX -, _+ etc.)
+    const ck=((d*16384+i)*1024+gid(A.mp,A.procs,pr))*256+gid(A.mt,A.tipos,tp);A.cube.set(ck,(A.cube.get(ck)||0)+1)};
+  const setup=()=>{M=detect(hdr,pend);
+    if(M.d<0||M.t<0||M.p<0)throw new Error('Não consegui identificar as colunas de data, tipo de alerta e procedimento. Cabeçalhos: '+hdr.join(' | '));
+    pend.forEach(add);pend=[]};
+  for(;;){
+    const{done,value}=await rd.read();
+    if(value){read+=value.length;buf+=dec.decode(value,{stream:true})}
+    if(done)buf+=dec.decode();
+    const ls=buf.split('\n');buf=done?'':ls.pop();
+    for(let l of ls){
+      if(l.endsWith('\r'))l=l.slice(0,-1);if(!l)continue;
+      if(!hdr){l=l.replace(/^\uFEFF/,'');D=dl(l);hdr=split(l,D).map(norm);continue}
+      const r=split(l,D);if(M)add(r);else{pend.push(r);if(pend.length>=200)setup()}
+    }
+    bar(read/f.size);if(++k%15==0)await tick();
+    if(done)break;
+  }
+  if(!M)setup();
+  if(!A.n)throw new Error('Nenhum alerta dos 17 tipos considerados foi encontrado neste arquivo.');
+  const N=A.cube.size,cd=new Uint16Array(N),cp=new Uint16Array(N),ct=new Uint16Array(N),cm=new Uint16Array(N),cc=new Uint16Array(N);let j=0;
+  A.cube.forEach((c,key)=>{const ti=key%256,k1=Math.floor(key/256),pi=k1%1024,k2=Math.floor(k1/1024);cd[j]=Math.floor(k2/16384)-A.mn;cp[j]=pi;ct[j]=ti;cm[j]=k2%16384;cc[j]=Math.min(c,65535);j++});
+  S={unk:[...A.unk.values()].sort((x,y)=>y[1]-x[1]),inclNovos:INCLUI_NOVOS,names:A.names,rn:A.rn,rk:A.rk,procs:A.procs,tipos:A.tipos,cd,cp,ct,cm,cc,n:A.n,minD:A.mn,maxD:A.mx,
+    cols:`data = “${M.H[M.d]}”, tipo = “${M.H[M.t]}”, procedimento = “${M.H[M.p]}”, motorista = “${M.H[M.m>=0?M.m:M.c]||'—'}”`};
+}
+
+/* ---------- interface ---------- */
+/* Embarcador: não existe coluna própria na planilha; é o nome entre "TOZZO –" e o parêntese do PROCEDIMENTO DE EMBARQUE
+   (ex.: "TOZZO – SEARA (LOGISTICO)" → SEARA). Se o texto não seguir o padrão, usa o texto sem o prefixo "TOZZO –". */
+function embOf(p){let x=String(p).replace(/^\s*TOZZO\s*[–-]\s*/i,'').replace(/\s*\([^)]*\)\s*$/,'').trim();return x||String(p).trim()}
+function prep(){
+  const ix=new Map();S.embs=[];S.pe=new Uint8Array(S.procs.length);
+  S.procs.forEach((p,i)=>{const e=embOf(p);let j=ix.get(e);if(j===undefined){j=S.embs.length;S.embs.push(e);ix.set(e,j)}S.pe[i]=Math.min(j,255)});
+  const fill=(id,all,arr)=>{$(id).innerHTML='<option value="">'+all+'</option>'+arr.map(([v,t])=>'<option value="'+v+'">'+esc(t)+'</option>').join('')};
+  const srt=(a,f)=>a.map((t,i)=>[i,f(t)]).sort((x,y)=>x[1].localeCompare(y[1],'pt-BR'));
+  fill('sT2','Todas',srt(S.tipos,x=>x));fill('sP2','Todos',srt(S.procs,x=>x));fill('sE2','Todos',srt(S.embs,x=>x));
+  $('lM2').innerHTML=srt(S.names,x=>x).map(([i,n])=>'<option value="'+esc(n)+'"></option>').join('');
+}
+function syncSel(){
+  const v=k=>F[k]===null?'':String(F[k]);
+  $('sT2').value=v('t');$('sP2').value=v('p');$('sE2').value=v('e');
+  if(document.activeElement!==$('iM2'))$('iM2').value=F.m===null?'':S.names[F.m];
+}
+function init(){
+  F.p=F.t=F.m=F.b=F.e=null;setOpen(false);prep();
+  $('drop').classList.add('hide');$('prog').style.display='none';
+  ['dIni','dFim'].forEach(i=>{$(i).min=ds(S.minD);$(i).max=ds(S.maxD);$(i).value=''});
+  $('status').textContent='';console.info('[Tozzo] Alertas GR: '+fmt(S.n)+' alertas · '+br(S.minD)+' a '+br(S.maxD)+' · '+S.cols);
+  if(S.unk&&S.unk.length){const tot=S.unk.reduce((a,x)=>a+x[1],0),lst=S.unk.slice(0,5).map(x=>x[0]+' ('+fmt(x[1])+')').join(', ');
+    $('status').textContent+=`Atenção: ${fmt(tot)} alerta(s) de tipo não reconhecido ${S.inclNovos?'incluídos com o rótulo "Tipo não reconhecido"':'fora dos totais'}: ${lst}${S.unk.length>5?'…':''}`;
+    console.warn('[Tozzo] Alertas GR: tipos de alerta não reconhecidos',S.unk)}
+  render();
+}
+const rk=(c,lab)=>{const r=[];c.forEach((v,i)=>{if(v)r.push([lab(i),v,i])});r.sort((x,y)=>y[1]-x[1]);return r};
+const top10=(l,sel)=>{const t=l.slice(0,10).map((r,i)=>[...r,i+1]);if(sel!==null&&!t.some(r=>r[2]===sel)){const j=l.findIndex(r=>r[2]===sel);if(j>=0)t.push([...l[j],j+1])}return t};
+function rank(el,rows,tot,head,k,sel,colf,flag){
+  if(!rows.length){el.innerHTML='<p class="mu">Sem dados para esta seleção.</p>';return}
+  el.innerHTML='<table><thead><tr><th>#</th><th>'+head+'</th><th class="n">Alertas</th><th class="n">%</th></tr></thead><tbody>'+
+  rows.map(([l,v,id,pos])=>{const p=tot?v/tot*100:0;
+    return `<tr class="row${id===sel?' sel':''}" data-k="${k}" data-i="${id}" title="Clique para filtrar"><td>${pos}</td><td><div class="lb">${colf?`<i style="background:${colf(id)}"></i>`:''}${esc(l)}${flag&&pos===1?'<span class="badge">maior ofensor</span>':''}</div><div class="bar"><b style="width:${p}%"></b></div></td><td class="n">${fmt(v)}</td><td class="n">${pf(p)}</td></tr>`}).join('')+'</tbody></table>';
+}
+function toggle(k,i){F[k]=F[k]===i?null:i;if(k==='e'&&F.p!==null&&F.e!==null&&S.pe[F.p]!==F.e)F.p=null;if(k==='p'&&F.p!==null&&F.e!==null&&S.pe[F.p]!==F.e)F.e=null;render()}
+function setOpen(v,scroll){openProc=v;$('tDon').classList.toggle('hide',!v);
+  $('bTog').textContent=v?'Detalhamento por procedimento  ▴ minimizar':'Detalhamento por procedimento  ▾ expandir';
+  $('bTog').setAttribute('aria-expanded',v);$('k3h').textContent=v?'ocultar detalhes ▴':'ver detalhes ▾';
+  if(v&&scroll)$('pDon').scrollIntoView({behavior:'smooth',block:'nearest'})}
+function flash(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}
+function arc(cx,cy,r0,r1,a0,a1){const p=(r,a)=>[(cx+r*Math.cos(a)).toFixed(2),(cy+r*Math.sin(a)).toFixed(2)],g=a1-a0>Math.PI?1:0,A=p(r1,a0),B=p(r1,a1),C=p(r0,a1),D=p(r0,a0);
+  return `M${A}A${r1} ${r1} 0 ${g} 1 ${B}L${C}A${r0} ${r0} 0 ${g} 0 ${D}Z`}
+function drawDon(rows,tot){
+  let a0=-Math.PI/2,s='';
+  if(!tot)s='<circle cx="100" cy="100" r="72" fill="none" stroke="var(--bd)" stroke-width="32"/>';
+  rows.forEach(([l,v,id])=>{const ang=Math.min(v/tot*2*Math.PI,2*Math.PI-1e-4),dim=F.p!==null&&F.p!==id;
+    s+=`<path class="sl" data-k="p" data-i="${id}" d="${arc(100,100,56,90,a0,a0+ang)}" fill="${col(id)}" opacity="${dim?.25:1}"><title>${esc(l)}: ${fmt(v)} (${pf(v/tot*100)})</title></path>`;a0+=ang});
+  s+=`<text x="100" y="101" text-anchor="middle" font-size="22" font-weight="700" fill="var(--tx)">${fmt(tot)}</text><text x="100" y="118" text-anchor="middle" font-size="11" fill="var(--mu)">alertas</text>`;
+  $('cDon').innerHTML=`<svg viewBox="0 0 200 200">${s}</svg>`;
+  $('lDon').innerHTML=rows.slice(0,6).map(([l,v,id])=>`<div class="li" data-k="p" data-i="${id}" style="${F.p!==null&&F.p!==id?'opacity:.45':''}"><i style="background:${col(id)}"></i><span title="${esc(l)}">${esc(l)}</span><b>${pf(tot?v/tot*100:0)}</b></div>`).join('')+(rows.length>6?`<div class="mu" style="padding:3px 6px">+ ${rows.length-6} outros procedimentos</div>`:'');
+}
+
+/* ---------- gráfico de comportamento (linha) com seleção de período ---------- */
+function niceStep(m){const e=Math.pow(10,Math.floor(Math.log10(m))),f=m/e;return(f<=1?1:f<=2?2:f<=5?5:10)*e}
+function drawLine(vals,a){
+  const box=$('cDia'),Wt=box.clientWidth||600,Ht=box.clientHeight||280,L=46,R=16,T=14,B=26,W=Math.max(10,Wt-L-R),H=Ht-T-B,n=vals.length;
+  const mx=Math.max(1,...vals),st=niceStep(mx/4),ymax=st*Math.ceil(mx/st),stp=n>1?W/(n-1):0;
+  const x=i=>L+(n>1?i*stp:W/2),y=v=>T+H-v/ymax*H;
+  let s='';
+  for(let v=0;v<=ymax+1e-9;v+=st)s+=`<line x1="${L}" x2="${L+W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--bd)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mu)">${fmt(v)}</text>`;
+  const nt=Math.min(n,7);for(let j=0;j<nt;j++){const i=nt>1?Math.round(j*(n-1)/(nt-1)):0;s+=`<text x="${x(i)}" y="${Ht-8}" text-anchor="${j==0&&n>1?'start':j==nt-1&&n>1?'end':'middle'}" font-size="11" fill="var(--mu)">${br(a+i).slice(0,5)}</text>`}
+  const pts=vals.map((v,i)=>`${x(i).toFixed(1)} ${y(v).toFixed(1)}`);
+  s+=`<path d="M${x(0)} ${y(0)}L${pts.join('L')}L${x(n-1)} ${y(0)}Z" fill="var(--ac)" opacity=".13"/><path d="M${pts.join('L')}" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linejoin="round"/>`;
+  s+=`<rect id="band" y="${T}" height="${H}" fill="var(--ac)" opacity=".2" class="hide"/><g id="hv" class="hide"><line id="xh" y1="${T}" y2="${T+H}" stroke="var(--mu)" stroke-dasharray="4 3"/><circle id="halo" r="13" fill="var(--ac)" opacity=".2"/><circle id="dot" r="6" fill="#fff" stroke="var(--ac)" stroke-width="3"/></g>`;
+  box.querySelector('svg')?.remove();box.insertAdjacentHTML('afterbegin',`<svg viewBox="0 0 ${Wt} ${Ht}" preserveAspectRatio="none">${s}</svg>`);
+  LC={vals,a,n,L,T,W,H,stp,x,y,tot:vals.reduce((p,c)=>p+c,0)};
+  if(F.b)setBand(F.b[0]-a,F.b[1]-a);
+}
+function setBand(lo,hi){const b=$('band');if(!b||!LC)return;const{n,L,W,stp,x}=LC;if(hi<0||lo>=n){b.classList.add('hide');return}
+  lo=Math.max(0,lo);hi=Math.min(n-1,hi);const h=Math.max(stp/2,2),x0=Math.max(L,x(lo)-h),x1=Math.min(L+W,x(hi)+h);
+  b.setAttribute('x',x0);b.setAttribute('width',Math.max(3,x1-x0));b.classList.remove('hide')}
+function idxAt(e){const r=$('cDia').getBoundingClientRect(),{n,L,stp}=LC;return Math.max(0,Math.min(n-1,n>1?Math.round((e.clientX-r.left-L)/stp):0))}
+function hover(i){const{vals,a,x,y,T,H,tot}=LC,v=vals[i],cx=x(i),cy=y(v);
+  $('hv').classList.remove('hide');$('xh').setAttribute('x1',cx);$('xh').setAttribute('x2',cx);
+  ['halo','dot'].forEach(id=>{$(id).setAttribute('cx',cx);$(id).setAttribute('cy',cy)});
+  const tp=$('tip');tp.innerHTML=`<b>${wd(a+i)}, ${br(a+i)}</b><br>${fmt(v)} alerta${v==1?'':'s'}<br><span>${pf(tot?v/tot*100:0)} do período exibido</span>`;
+  tp.classList.remove('hide');const w=tp.offsetWidth,bw=$('cDia').clientWidth;
+  tp.style.left=Math.max(0,cx+16+w>bw?cx-w-16:cx+16)+'px';tp.style.top=Math.max(0,Math.min(cy-30,T+H-60))+'px'}
+function unhover(){$('hv')?.classList.add('hide');$('tip').classList.add('hide')}
+(()=>{const box=$('cDia');
+  box.addEventListener('pointermove',e=>{if(!LC)return;const i=idxAt(e);if(drag){drag.b=i;setBand(Math.min(drag.a,i),Math.max(drag.a,i))}hover(i)});
+  box.addEventListener('pointerleave',()=>{if(!drag)unhover()});
+  box.addEventListener('pointerdown',e=>{if(!LC)return;const i=idxAt(e);drag={a:i,b:i};box.setPointerCapture(e.pointerId);setBand(i,i);hover(i)});
+  box.addEventListener('pointerup',e=>{if(!drag||!LC)return;const lo=Math.min(drag.a,drag.b),hi=Math.max(drag.a,drag.b),d0=LC.a+lo,d1=LC.a+hi;drag=null;
+    F.b=(F.b&&F.b[0]===d0&&F.b[1]===d1)?null:[d0,d1];render()});
+  box.addEventListener('pointercancel',()=>{drag=null;if(LC)setBand(F.b?F.b[0]-LC.a:1e9,F.b?F.b[1]-LC.a:-1)});
+  new ResizeObserver(()=>{if(S&&LC&&!drag&&box.clientWidth&&Math.abs(box.clientWidth-(LC.W+62))>2)drawLine(LC.vals,LC.a)}).observe(box)})();
+
+/* ---------- cálculo e renderização ---------- */
+function render(){
+  const x0=$('dIni').value?pd($('dIni').value):S.minD,y0=$('dFim').value?pd($('dFim').value):S.maxD,a=Math.min(x0,y0),b=Math.max(x0,y0);
+  const bs=F.b&&F.b[1]>=a&&F.b[0]<=b?[Math.max(F.b[0],a),Math.min(F.b[1],b)]:null;if(F.b&&!bs)F.b=null;
+  const ec=new Int32Array(S.embs.length),pc=new Int32Array(S.procs.length),tc=new Int32Array(S.tipos.length),mc=new Int32Array(S.names.length),dc=new Int32Array(b-a+1);
+  let tot=0;const{cd,cp,ct,cm,cc,minD,pe}=S,fp=F.p,ft=F.t,fm=F.m,fe=F.e;
+  for(let i=0,n=cc.length;i<n;i++){
+    const d=cd[i]+minD;if(d<a||d>b)continue;
+    const p=cp[i],t=ct[i],m=cm[i],c=cc[i],oe=fe===null||pe[p]===fe,op=(fp===null||p===fp)&&oe,ot=ft===null||t===ft,om=fm===null||m===fm;
+    if(op&&ot&&om)dc[d-a]+=c;
+    if(bs&&(d<bs[0]||d>bs[1]))continue;
+    if(ot&&om&&oe)pc[p]+=c;if(ot&&om&&(fp===null||p===fp))ec[pe[p]]+=c;if(op&&om)tc[t]+=c;if(op&&ot)mc[m]+=c;if(op&&ot&&om)tot+=c;
+  }
+  const embs=rk(ec,i=>S.embs[i]),procs=rk(pc,i=>S.procs[i]),tipos=rk(tc,i=>S.tipos[i]),mots=rk(mc,i=>S.names[i]);
+  const tP=procs.reduce((s,r)=>s+r[1],0),tT=tipos.reduce((s,r)=>s+r[1],0),tM=mots.reduce((s,r)=>s+r[1],0);
+  S.topT=tipos.length?tipos[0][2]:null;
+  const rng=bs?(bs[0]===bs[1]?br(bs[0]):br(bs[0])+' a '+br(bs[1])):'';
+  $('per').textContent=`Período analisado: ${br(a)} a ${br(b)}`;
+  const chips=[];if(fp!==null)chips.push(['p','Procedimento: '+S.procs[fp]]);if(ft!==null)chips.push(['t','Alerta: '+S.tipos[ft]]);if(fm!==null)chips.push(['m','Motorista: '+S.names[fm]]);if(fe!==null)chips.push(['e','Embarcador: '+S.embs[fe]]);if(bs)chips.push(['b','Período selecionado: '+rng]);
+  $('chips').innerHTML=chips.map(([k,t])=>`<button class="chip" data-chip="${k}">${esc(t)} ✕</button>`).join('')+(chips.length>1?'<button class="chip" data-chip="all">Limpar tudo ✕</button>':'');
+  const dsc=sk=>{const x=[];if(sk!=='p'&&fp!==null)x.push(S.procs[fp]);if(sk!=='t'&&ft!==null)x.push(S.tipos[ft]);if(sk!=='m'&&fm!==null)x.push(S.names[fm]);if(sk!=='e'&&fe!==null)x.push(S.embs[fe]);if(bs)x.push(rng);return x};
+  const sub=(id,sk)=>{const x=dsc(sk);$(id).textContent=x.length?'Maiores ofensores em: '+x.join(' · '):'Clique em uma linha para filtrar os demais painéis';return x.length>0};
+  $('k1').textContent=fmt(tot);
+  $('k2').textContent=fmt(fm!==null?(mc[fm]>0?1:0):mots.length);
+  $('k3').textContent=fmt(fp!==null?(pc[fp]>0?1:0):procs.length);
+  $('k5').textContent=mots.length?mots[0][0]:'—';$('k5s').textContent=mots.length?`${fmt(mots[0][1])} alertas (${pf(mots[0][1]/tM*100)})`:'';
+  const tE=embs.reduce((q,r)=>q+r[1],0);
+  rank($('tEmb'),embs.map((r,i)=>[...r,i+1]),tE,'Embarcador','e',fe,null,sub('sE','e'));
+  const eSel=fe!==null?fe:(embs.length?embs[0][2]:null),eRows=eSel===null?[]:procs.filter(r=>pe[r[2]]===eSel).map((r,i)=>[...r,i+1]);
+  $('sEP').textContent=eSel===null?'':(fe!==null?'Embarcador selecionado: ':'Maior embarcador: ')+S.embs[eSel]+' · '+fmt(eRows.reduce((q,r)=>q+r[1],0))+' alertas';
+  rank($('tEmbP'),eRows,eRows.reduce((q,r)=>q+r[1],0),'Procedimento','p',fp,null);
+  syncSel();
+  $('k4').textContent=tipos.length?tipos[0][0]:'—';
+  $('k4s').textContent=tipos.length?`${fmt(tipos[0][1])} alertas (${pf(tipos[0][1]/tT*100)})`:'';
+  rank($('tDon'),procs.map((r,i)=>[...r,i+1]),tP,'Procedimento','p',fp,col);
+  drawDon(procs,tP);
+  rank($('tTip'),top10(tipos,ft),tT,'Tipo de alerta','t',ft,null,sub('sT','t'));
+  rank($('tPro'),top10(procs,fp),tP,'Procedimento de embarque','p',fp,null,sub('sP','p'));
+  rank($('tMot'),top10(mots,fm),tM,'Motorista','m',fm,null,sub('sM','m'));
+  const vals=Array.from(dc);drawLine(vals,a);
+  let mi=0,sm=0;vals.forEach((v,i)=>{sm+=v;if(v>vals[mi])mi=i});
+  $('dInfo').textContent=`Pico: ${br(a+mi)} (${fmt(vals[mi])}) · Média diária: ${fmt(Math.round(sm/vals.length))} · Arraste no gráfico para selecionar um período; ele filtra os demais painéis`;
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener('click',e=>{
+  const r=e.target.closest('[data-k][data-i]');if(r){toggle(r.dataset.k,+r.dataset.i);return}
+  const c=e.target.closest('[data-chip]');if(c){const k=c.dataset.chip;if(k==='all')F.p=F.t=F.m=F.b=F.e=null;else F[k]=null;render()}
+});
+const act=(el,fn)=>{el.onclick=fn;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}}};
+act($('kc3'),()=>setOpen(!openProc,true));
+act($('bTog'),()=>setOpen(!openProc));
+act($('kc4'),()=>{if(S.topT===null)return;F.t=F.t===S.topT?null:S.topT;render();$('rowFil').scrollIntoView({behavior:'smooth',block:'start'});flash($('pTip'))});
+const setF=(k,v)=>{F[k]=v===''||v===null?null:+v;render()};
+$('sT2').onchange=e=>setF('t',e.target.value);$('sP2').onchange=e=>setF('p',e.target.value);$('sE2').onchange=e=>{F.p=null;setF('e',e.target.value)};
+$('iM2').onchange=e=>{const v=e.target.value.trim();if(!v){setF('m',null);return}const j=S.names.findIndex(n=>n.toLowerCase()===v.toLowerCase());if(j>=0)setF('m',j);else{e.target.value=F.m===null?'':S.names[F.m]}};
+$('bAp').onclick=()=>{F.b=null;render()};
+$('bCl').onclick=()=>{$('dIni').value='';$('dFim').value='';F.p=F.t=F.m=F.b=F.e=null;render()};
+$('bNew').onclick=()=>$('drop').classList.toggle('hide');
+$('bRf').onclick=()=>TozzoData.reload('alertasgr');
+const dz=$('drop');
+async function handle(f){if(!f)return;$('err').textContent='';try{await loadCSV(f);init()}catch(e){$('err').textContent=e.message;$('prog').style.display='none'}}
+dz.onclick=e=>{if(e.target.id!=='file')$('file').click()};
+$('file').onchange=e=>handle(e.target.files[0]);
+dz.ondragover=e=>{e.preventDefault();dz.classList.add('on')};
+dz.ondragleave=()=>dz.classList.remove('on');
+dz.ondrop=e=>{e.preventDefault();dz.classList.remove('on');handle(e.dataTransfer.files[0])};
+/* Resumo p/ Página Inicial (somente leitura): tipo de alerta mais frequente no período */
+/* Pessoas p/ a aba Ranking (somente leitura): alertas por motorista e dia (os mesmos tipos considerados no painel). Sem nome / "CPF não encontrado" não entram. */
+let VER=0;
+window.TozzoPessoas=function(v){
+  if(!S)return{pronto:false};if(v===VER)return{pronto:true,same:true,ver:VER};
+  if(S.rk){const o=[];S.rk.forEach((w,k)=>o.push({n:S.rn[Math.floor(k/65536)],d:ds(k%65536),w}));return{pronto:true,ver:VER,motorista:o}}   // nomes exatamente como na planilha
+  const m=new Map();
+  for(let i=0,n=S.cc.length;i<n;i++){const nm=S.names[S.cm[i]];if(!nm||/^CPF n[aã]o encontrado/i.test(nm)||/^\(n[aã]o identificado\)/i.test(nm)||/^[\d.\-\s]+$/.test(nm))continue;
+    const k=S.cm[i]*65536+S.cd[i];m.set(k,(m.get(k)||0)+S.cc[i])}
+  const out=[];m.forEach((w,k)=>out.push({n:S.names[Math.floor(k/65536)],d:ds((k%65536)+S.minD),w}));
+  return{pronto:true,ver:VER,motorista:out};
+};
+window.TozzoResumo=function(ini,fim){
+  if(!S)return{pronto:false};
+  const a=ini?pd(ini):S.minD,b=fim?pd(fim):S.maxD,lo=Math.min(a,b),hi=Math.max(a,b),tc=new Int32Array(S.tipos.length);let tot=0;
+  for(let i=0,n=S.cc.length;i<n;i++){const d=S.cd[i]+S.minD;if(d<lo||d>hi)continue;tc[S.ct[i]]+=S.cc[i];tot+=S.cc[i]}
+  let bi=-1;tc.forEach((v,i)=>{if(v>0&&(bi<0||v>tc[bi]||(v===tc[bi]&&S.tipos[i].localeCompare(S.tipos[bi],'pt-BR')<0)))bi=i});
+  return{pronto:true,vazio:bi<0,nome:bi<0?'':S.tipos[bi],valor:bi<0?0:tc[bi],total:tot,min:ds(S.minD),max:ds(S.maxD),nota:'tipo de alerta'};
+};
+TozzoData.start('alertasgr',{
+  required:['data','controle','procedimento','motorista'],
+  onData:async(text)=>{
+    // guarda período e seleções (por NOME, pois os índices mudam quando os dados mudam)
+    const k=S?{i:$('dIni').value,f:$('dFim').value,p:F.p!==null?S.procs[F.p]:null,t:F.t!==null?S.tipos[F.t]:null,m:F.m!==null?S.names[F.m]:null,e:F.e!==null?S.embs[F.e]:null,b:F.b,o:openProc}:null;
+    await loadCSV(new Blob([text]));init();VER++;
+    if(k){
+      const dentro=v=>v&&pd(v)>=S.minD&&pd(v)<=S.maxD;
+      if(dentro(k.i))$('dIni').value=k.i;if(dentro(k.f))$('dFim').value=k.f;
+      const ix=(arr,v)=>{const j=v===null?-1:arr.indexOf(v);return j<0?null:j};
+      F.p=ix(S.procs,k.p);F.t=ix(S.tipos,k.t);F.m=ix(S.names,k.m);F.e=ix(S.embs,k.e);F.b=k.b;setOpen(k.o);render();
+    }
+  }});
+</script>
+</body>
+</html>

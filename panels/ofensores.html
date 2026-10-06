@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ofensores</title>
+<style>
+:root{--bg:#FFFFFF;--card:#FFFFFF;--bd:#CFE0D5;--tx:#10241A;--mut:#587065;--am:#007D3A;--tl:#007D3A;--panel2:#EAF4EE;--accent:#007D3A;--lime:#C7D30A;--px:max(clamp(16px,4vw,40px),calc((100vw - 1180px)/2));box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:12px "Courier New",monospace;padding:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end}
+label{display:block;color:var(--mut);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+select,input,button{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:3px;padding:9px;font:inherit;min-width:130px}
+button{cursor:pointer}button:hover{border-color:var(--mut)}button:disabled{opacity:.4;cursor:default}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:4px;padding:14px}
+.card h3{margin:0 0 10px;font-size:10px;color:var(--mut);letter-spacing:.1em;font-weight:400;text-transform:uppercase}
+.big{font-size:22px}.k1{border-color:#5a4210;background:#1a1405}.k1 .big{color:var(--am);font-size:32px}
+.sub{color:var(--mut);font-size:10px;margin-top:10px}
+.kpis .sub{font-size:15px;line-height:1.35;color:#9cc3ca;overflow-wrap:anywhere}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:8px;margin-top:8px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:230px;overflow-x:scroll;padding-bottom:8px}
+.b{flex:1;min-width:34px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:9px;color:var(--mut)}
+.b i{display:block;width:100%;background:var(--am);margin:2px 0}
+.rk{display:grid;grid-template-columns:minmax(90px,1.2fr) 2fr 64px;gap:8px;align-items:center;margin:7px 0;font-size:11px}
+.rk .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8fb3ba}
+.rk .t{background:#000;height:12px}.rk .t i{display:block;height:100%;background:var(--tl)}.rk.op .t i{background:var(--am)}
+.rk .v{text-align:right}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--bd);white-space:nowrap}
+th{color:var(--mut);cursor:pointer;font-weight:400;text-transform:uppercase;font-size:10px}td.n,th.n{text-align:right}
+.pg{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px}
+#sr[aria-pressed=true]{border-color:var(--am);color:var(--am)}
+#msg{color:var(--am);margin:6px 0}
+
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:1rem;line-height:1.4;padding:0 var(--px) 60px;background:#FFFFFF;color:var(--tx)}
+body::before{content:"";display:block;height:12px;margin:0 calc(-1*var(--px)) 20px;background:linear-gradient(90deg,#052A18,#007D3A);border-bottom:4px solid var(--lime)}
+.row{gap:8px;margin-bottom:16px}
+label{font-size:.75rem;letter-spacing:0;text-transform:none;color:var(--mut);margin-bottom:3px}
+select,input{background:#FFFFFF;color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:.82rem;min-width:130px}
+select:focus,input:focus{outline:2px solid var(--lime);border-color:var(--accent)}
+button{background:transparent;border:1px solid var(--bd);color:var(--tx);border-radius:6px;padding:7px 14px;font-size:.82rem;font-weight:400}
+button:hover{border-color:var(--accent)}
+#sr[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+#msg{font-size:.85rem;color:var(--accent)}
+#msg:empty{display:none}
+.kpis{gap:10px;margin:0 0 22px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.card{background:#FFFFFF;border:1px solid var(--bd);border-radius:8px;padding:12px 14px}
+.kpis .card{border-top:3px solid var(--lime)}
+.k1,.kpis .card.k1{background:#FFFFFF;border-color:var(--bd);border-top:3px solid var(--lime)}
+.big,.k1 .big{font-size:1.5rem;font-weight:650;color:var(--tx)}
+.k1 .big{color:var(--accent);font-size:1.5rem}
+.card h3{font-size:.75rem;letter-spacing:0;text-transform:none;color:var(--mut);font-weight:400;margin:0 0 4px}
+.sub,.kpis .sub{font-size:.75rem;line-height:1.4;color:var(--mut);margin-top:2px}
+.grid{gap:16px;margin-top:16px}
+.card[style]{margin-top:16px!important}
+.bars{gap:6px}
+.b{font-size:.75rem;color:var(--mut);min-width:78px;flex:0 0 78px}
+.bars::-webkit-scrollbar{height:12px}.bars::-webkit-scrollbar-thumb{background:var(--accent);border-radius:6px}.bars::-webkit-scrollbar-track{background:var(--panel2);border-radius:6px}.bars{scrollbar-color:var(--accent) var(--panel2)}
+.b i{background:var(--accent);border-radius:3px 3px 0 0}
+.rk{grid-template-columns:110px 1fr 34px;gap:8px;font-size:.78rem;margin:7px 0}
+.rk .n{color:var(--tx)}
+.rk .t{background:var(--panel2);height:9px;border-radius:4px;overflow:hidden}
+.rk .t i{background:var(--accent);border-radius:4px}
+.rk.op .t i{background:var(--accent)}
+.tw{border:1px solid var(--bd);border-radius:8px}
+table{font-size:.8rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--bd)}
+th{background:var(--panel2);color:var(--mut);font-weight:600;font-size:.8rem;text-transform:none}
+tbody tr:hover td{background:var(--panel2)}
+.pg{font-size:.8rem;color:var(--mut)}
+.sel{min-width:150px}
+details.map{margin:0 0 14px;border:1px solid var(--bd);border-radius:8px;padding:8px 12px;background:#fff}
+details.map summary{cursor:pointer;color:var(--accent);font-size:.82rem}
+details.map .row{margin:10px 0 2px}
+.hl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 22px}
+.hl .card{border-top:3px solid var(--lime)}
+.hl .card.k1{border-left:4px solid var(--accent)}
+.up{color:#C62828;font-weight:600}.dn{color:#2E7D4F;font-weight:600}
+.rk3{display:grid;grid-template-columns:22px minmax(140px,2fr) minmax(40px,1fr) 52px 46px;gap:8px;align-items:center;margin:7px 0;font-size:.78rem;cursor:pointer;padding:2px 4px;border-radius:5px}
+.rk3:hover{background:var(--panel2)}.rk3.on{background:rgba(11,94,59,.14);outline:1px solid var(--accent)}
+.rk3 .n{overflow:hidden;white-space:normal;line-height:1.2;overflow-wrap:anywhere}
+.rk3 .t{background:var(--panel2);height:9px;border-radius:4px;overflow:hidden}.rk3 .t i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.rk3 .v,.rk3 .p{text-align:right}.rk3 .pos{color:var(--mut)}
+.rk3 small{display:block;color:var(--mut);font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chead{display:grid;grid-template-columns:22px minmax(140px,2fr) minmax(40px,1fr) 52px 46px;gap:8px;font-size:.72rem;color:var(--mut);margin-bottom:4px;padding:0 4px}
+.chead span:nth-child(4),.chead span:nth-child(5){text-align:right}
+.conc{font-size:.8rem;color:var(--mut);margin-top:10px;line-height:1.5}
+
+.kpis .card.clk{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.kpis .card.clk:hover{border-color:var(--accent)}
+.kpis .card.clk:focus-visible{outline:2px solid var(--lime)}
+.kpis .card.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,125,58,.25)}
+.kpis .card .hint{font-size:.7rem;color:var(--mut);margin-top:2px}
+</style><script src="../js/config.js"></script>
+<script src="../js/data-source.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/tozzo-theme.css">
+</head><body>
+<div class="row">
+ <div><label>Data inicial</label><input type="date" id="di"></div>
+ <div><label>Data final</label><input type="date" id="df"></div>
+ <div><label id="lOf">Ofensor</label><select id="so" class="sel"></select></div>
+ <div id="fOp"><label>Operação</label><select id="sp" class="sel"></select></div>
+ <div><label>Ocorrência</label><select id="sc" class="sel"></select></div>
+ <div id="fTu"><label>Turno</label><select id="st" class="sel"></select></div>
+ <div><label>Buscar</label><input id="q" placeholder="Digite um nome"></div>
+ <button id="clr">Limpar filtros</button>
+ <button id="rf">⟳ Atualizar</button>
+</div>
+<div id="msg"></div>
+<div class="hl" id="hl"></div>
+<div class="grid" id="gr"></div>
+<div class="card" style="margin-top:16px"><h3>Evolução por mês</h3><div class="bars" id="cm"></div></div>
+<script>
+const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString('pt-BR'),pf=p=>p.toFixed(1).replace('.',',')+'%';
+const norm=s=>String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MODO=(new URLSearchParams(location.search).get('k')||'gestao')==='motoristas'?'motoristas':'gestao';
+const GE=MODO==='gestao',KEY='ofensores'+MODO;
+const MESES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const mlab=k=>k?MESES[+k.slice(5)-1]+'/'+k.slice(0,4):'—';
+document.title='Ofensores '+(GE?'Gestão':'Motoristas');
+$('lOf').textContent=GE?'Gestor':'Motorista';
+$('q').placeholder=GE?'Digite o nome do gestor':'Digite o nome do motorista';
+if(!GE)$('fOp').style.display='none';else $('fTu').style.display='none';
+
+/* ---------- leitura de CSV (sem biblioteca externa) ---------- */
+function parseCsv(t){
+  const out=[];let row=[],cur='',q=false;t=String(t).replace(/^\uFEFF/,'');
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}
+    else if(ch==='"')q=true;else if(ch===','){row.push(cur);cur=''}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;row.push(cur);cur='';out.push(row);row=[]}
+    else cur+=ch}
+  if(cur!==''||row.length){row.push(cur);out.push(row)}
+  return out.filter(r=>r.some(c=>String(c).trim()!==''));
+}
+const okD=(y,m,d)=>y>=2020&&y<=2035&&m>=1&&m<=12&&d>=1&&d<=31;
+function parseDate(v){ // 'AAAA-MM-DD' ('AAAA-MM-01' se só houver mês/ano); '' se inválida
+  const s=String(v==null?'':v).trim();if(!s)return '';let m;
+  const R=(y,mo,d)=>okD(+y,+mo,+d)?y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0'):'';
+  if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?!\d)/)))return R(m[3],m[2],m[1]);
+  if((m=s.match(/^(\d{1,2})\/(\d{2})(\d{4})(?!\d)/)))return R(m[3],m[2],m[1]);      // digitação "28/092025"
+  if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})(?!\d)/)))return R('20'+m[3],m[2],m[1]);
+  if((m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)))return R(m[1],m[2],m[3]);
+  if((m=s.match(/^(\d{4})-(\d{1,2})$/)))return R(m[1],m[2],1);
+  if((m=s.match(/^(\d{1,2})\/(\d{4})$/)))return R(m[2],m[1],1);
+  return '';
+}
+const num=v=>{const s=String(v==null?'':v).replace(/[^\d,.-]/g,'');if(!s)return NaN;return parseFloat(s.indexOf(',')>-1?s.replace(/\./g,'').replace(',','.'):s)};
+const titulo=s=>s.toLowerCase().replace(/(^|[\s*(\-])(\S+)/g,(a,b,w,i)=>b+((i>0&&/^(de|da|do|das|dos|e)$/.test(w))?w:w.charAt(0).toUpperCase()+w.slice(1)));   // "FERNANDA", "fernanda" → "Fernanda"
+
+/* ---------- identificação automática das colunas ---------- */
+let H=[],DATA=[],MAPC={d:-1,o:-1,p:-1,t:-1,c:-1,q:-1,n:-1},ROWS=[],ERRMAP='',SEMDATA=0;
+const RE_OF=GE?/^gestor|responsavel|gerente|supervisor|coordenador|setor|area|departamento/:/motorista|condutor|^nome/;
+const RE_OP=/^operacao|^filial|^unidade/;
+const RE_TU=/^turno/;
+const RE_CA=/^ocorrencia|causa|motivo|infracao|categoria|^tipo|problema|alerta|ofensa/;
+const RE_DT=/data|^mes|periodo|date|competencia/;
+const RE_Q=/^(qtd|quantidade|contagem|count|counta|total|qtde)\b/;
+function detect(){
+  const hn=H.map(norm),S=DATA.slice(0,3000);
+  const frac=(j,f)=>{let n=0,t=0;S.forEach(r=>{const v=r[j];if(v!=null&&String(v).trim()!==''){t++;if(f(v))n++}});return t?n/t:0};
+  const first=(re,skip)=>hn.findIndex((h,j)=>re.test(h)&&!skip.includes(j));
+  let d=hn.findIndex((h,j)=>RE_DT.test(h)&&frac(j,v=>!!parseDate(v))>.5);
+  if(d<0)d=hn.findIndex((h,j)=>frac(j,v=>!!parseDate(v))>.6);
+  const o=first(RE_OF,[d]),p=GE?first(RE_OP,[d,o]):-1,t=GE?-1:first(RE_TU,[d,o]),c=first(RE_CA,[d,o,p,t]);
+  const q=hn.findIndex((h,j)=>RE_Q.test(h)&&![d,o,p,t,c].includes(j)&&frac(j,v=>!isNaN(num(v)))>.8);
+  MAPC={d,o,p,t,c,q,n:GE?first(/^condutor|^motorista/,[d,o,p]):-1};
+}
+/* ---------- montagem dos registros ---------- */
+let MIN='',MAX='';
+function build(keep){
+  const {d,o,p,t,c,q,n:cn}=MAPC;ERRMAP='';
+  if(o<0){ROWS=[];$('msg').textContent='Encontrei uma incompatibilidade nesta fonte: não identifiquei a coluna do '+(GE?'gestor':'motorista')+'.';ERRMAP='o';draw();return}
+  $('msg').textContent='';
+  const out=[];SEMDATA=0;
+  const canon=new Map();   // junta variações de maiúsculas/minúsculas e espaços ("FERNANDA", "fernanda ")
+  const nome=v=>{const t=String(v==null?'':v).replace(/\s+/g,' ').trim();if(!t||t==='-')return '(não informado)';const k=t.toLowerCase();if(!canon.has(k))canon.set(k,titulo(t));return canon.get(k)};
+  DATA.forEach(r=>{
+    const dt=d>=0?parseDate(r[d]):'';
+    let w=1;if(q>=0){const x=num(r[q]);w=isNaN(x)?0:x}
+    if(w<=0)return;
+    if(d>=0&&!dt)SEMDATA++;
+    const opn=p>=0?(String(r[p]==null?'':r[p]).replace(/\s+/g,' ').trim()||'(não informada)'):'';
+    const tun=t>=0?(String(r[t]==null?'':r[t]).replace(/\s+/g,' ').trim()):'';
+    out.push({d:dt,m:dt?dt.slice(0,7):'',o:nome(r[o]),rn:String(r[o]==null?'':r[o]).replace(/\s+/g,' ').trim(),cn:cn>=0?String(r[cn]==null?'':r[cn]).replace(/\s+/g,' ').trim():'',p:opn,t:tun,c:c>=0?(String(r[c]==null?'':r[c]).trim()||'(não informada)'):'(sem campo de causa)',w});
+  });
+  ROWS=out;
+  const ds=out.map(r=>r.d).filter(Boolean).sort();
+  MIN=ds[0]||'';MAX=ds[ds.length-1]||'';
+  const hasD=ds.length>0;['di','df'].forEach(i=>$(i).parentNode.style.display=hasD?'':'none');
+  const kv=['di','df','so','sp','st','sc','q'].map(i=>$(i).value);
+  $('di').min=$('df').min=MIN;$('di').max=$('df').max=MAX;$('di').value=MIN;$('df').value=MAX;
+  const opts=(el,arr,all)=>el.innerHTML='<option value="">'+all+'</option>'+arr.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join('');
+  const cnt=k=>{const m=new Map();out.forEach(r=>m.set(r[k],(m.get(r[k])||0)+r.w));return [...m].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'pt-BR')).map(x=>x[0])};
+  opts($('so'),cnt('o').sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todos');opts($('sp'),cnt('p').sort((a,b)=>a.localeCompare(b,'pt-BR')),'Todas');opts($('sc'),cnt('c'),'Todas');opts($('st'),cnt('t').filter(Boolean),'Todos');
+  if(keep){['di','df','so','sp','st','sc','q'].forEach((i,n)=>{if(!kv[n])return;$(i).value=kv[n];if(i!=='q'&&$(i).value!==kv[n]){$(i).value=(i==='di'?MIN:i==='df'?MAX:'')}})}
+  draw();
+}
+
+/* ---------- cálculo e desenho ---------- */
+let TODOS=false;
+function range(){let a=$('di').value||MIN,b=$('df').value||MAX;if(a>b){const t=a;a=b;b=t}return [a,b]}
+function view(){
+  const [a,b]=range(),full=(a===MIN&&b===MAX);
+  const so=$('so').value,sp=$('sp').value,st=$('st').value,sc=$('sc').value,q=norm($('q').value);
+  return ROWS.filter(r=>(r.d?(r.d>=a&&r.d<=b):full)&&(!so||r.o===so)&&(!sp||r.p===sp)&&(!st||r.t===st)&&(!sc||r.c===sc)&&(!q||norm(r.o+' '+r.p+' '+r.t+' '+r.c).includes(q)));
+}
+function agg(rows,k){const m=new Map();rows.forEach(r=>m.set(r[k],(m.get(r[k])||0)+r.w));return [...m].sort((x,y)=>y[1]-x[1]||x[0].localeCompare(y[0],'pt-BR'))}
+const card=(h,big,sub,k,v,on,sty)=>'<div class="card'+(k?' clk':'')+(on?' on':'')+'"'+(k?' role="button" tabindex="0" data-ck="'+k+'" data-cv="'+esc(v)+'" title="Clique para filtrar as telas abaixo"':'')+'><h3>'+h+'</h3><div class="big"'+(sty?' style="'+sty+'"':'')+'>'+big+'</div><div class="sub">'+sub+'</div></div>';
+const BIGT='font-size:1.15rem;overflow-wrap:anywhere';
+function rows3(L,tot,key,cur,n){
+  const mx=L.length?L[0][1]:1;
+  return L.slice(0,n).map(([nm,v],i)=>'<div class="rk3'+(nm===cur?' on':'')+'" data-'+key+'="'+esc(nm)+'" title="Clique para filtrar"><span class="pos">'+(i+1)+'</span><span class="n" title="'+esc(nm)+'">'+esc(nm)+'</span><span class="t"><i style="width:'+v/mx*100+'%"></i></span><span class="v">'+fmt(v)+'</span><span class="p">'+pf(tot?v/tot*100:0)+'</span></div>').join('')||'<div class="sub">Sem dados para esta seleção</div>';
+}
+const head3=l=>'<div class="chead"><span>#</span><span>'+l+'</span><span></span><span>Qtd</span><span>%</span></div>';
+function draw(){
+  const V=ERRMAP?[]:view(),tot=V.reduce((s,r)=>s+r.w,0);
+  const O=agg(V,'o'),P=agg(V,'p').filter(x=>x[0]),T=agg(V,'t').filter(x=>x[0]),C=agg(V,'c'),M=agg(V,'m').filter(x=>x[0]).sort((x,y)=>x[0].localeCompare(y[0]));
+  const topM=M.length?M.reduce((a,b)=>b[1]>a[1]?b:a):null;
+  const [a,b]=ERRMAP||!MIN?['','']:range();
+  const per=MIN?br(a)+' a '+br(b):'';
+  let cardsH='';
+  const real=L=>L.find(x=>x[0].charAt(0)!=='(');
+  const qt=x=>fmt(x[1])+(x[1]===1?' ocorrência':' ocorrências');
+  const oT=real(O),pT=real(P),cT=real(C);
+  const a2=MIN?(a<MIN?MIN:a):'',b2=MIN?(b>MAX?MAX:b):'';
+  const mR=k=>{const y=+k.slice(0,4),m=+k.slice(5,7),f=k+'-01',l=k+'-'+String(new Date(y,m,0).getDate()).padStart(2,'0');return [f<MIN?MIN:f,l>MAX?MAX:l]};
+  const mOn=topM&&(()=>{const r=mR(topM[0]);return a2===r[0]&&b2===r[1]})();
+  cardsH+=card(GE?'Maior ofensor · Gestor':'Maior ofensor · Motorista',oT?esc(oT[0]):'—',oT?qt(oT):'',oT?'o':'',oT?oT[0]:'',oT&&$('so').value===oT[0],BIGT);
+  if(GE)cardsH+=card('Maior ofensor · Operação',pT?esc(pT[0]):'—',pT?qt(pT):'',pT?'p':'',pT?pT[0]:'',pT&&$('sp').value===pT[0],BIGT);
+  cardsH+=card(GE?'Principal ocorrência':'Principal ocorrência',cT?esc(cT[0]):'—',cT?qt(cT):'',cT?'c':'',cT?cT[0]:'',cT&&$('sc').value===cT[0],BIGT);
+  cardsH+=card('Maior mês',topM?mlab(topM[0]):'—',topM?qt(topM):(MIN?'':'sem data na base'),topM?'m':'',topM?topM[0]:'',!!mOn);
+  $('hl').innerHTML=cardsH;
+  // gráficos / rankings
+  const t3=O.slice(0,3).reduce((s,x)=>s+x[1],0),t10=O.slice(0,10).reduce((s,x)=>s+x[1],0);
+  const nO=TODOS?O.length:10;
+  let g='<div class="card"><h3>'+(GE?'Gestores · quantidade e participação (%)':'Motoristas · quantidade e participação (%)')+'</h3>'+head3(GE?'Gestor':'Motorista')+'<div id="rk">'+rows3(O,tot,'o',$('so').value,nO)+'</div>'
+    +(O.length>10?'<button type="button" id="tg" style="margin-top:8px">'+(TODOS?'Mostrar só os 10 primeiros':'Mostrar todos ('+fmt(O.length)+')')+'</button>':'')
+    +'<div class="conc">'+(O.length?'Concentração: os 3 primeiros reúnem '+pf(t3/tot*100)+' das ocorrências e os 10 primeiros '+pf(t10/tot*100)+' (de '+fmt(O.length)+' no total).':'')+'</div></div>';
+  if(GE)g+='<div class="card"><h3>Operações · quantidade e participação (%)</h3>'+head3('Operação')+'<div id="rp">'+rows3(P,tot,'p',$('sp').value,10)+'</div></div>';
+  if(!GE)g+='<div class="card"><h3>Turnos · quantidade e participação (%)</h3>'+head3('Turno')+'<div id="rt">'+rows3(T,T.reduce((q,x)=>q+x[1],0),'t',$('st').value,10)+'</div></div>';
+  g+='<div class="card"><h3>'+(GE?'Ocorrências':'Ocorrências')+'</h3>'+head3('Ocorrência')+'<div id="rc">'+rows3(C,tot,'c',$('sc').value,10)+'</div></div>';
+  $('gr').innerHTML=g;
+  const mxM=Math.max(1,...M.map(x=>x[1]));
+  $('cm').innerHTML=M.length?M.map(([k,v])=>'<div class="b">'+fmt(v)+'<i style="height:'+Math.max(2,v/mxM*140)+'px"></i>'+k.slice(5)+'/'+k.slice(0,4)+'</div>').join(''):'<div class="sub">Sem datas na base: a evolução por mês não pode ser calculada.</div>';
+  const tg=$('tg');if(tg)tg.onclick=()=>{TODOS=!TODOS;draw()};
+  if(SEMDATA&&!ERRMAP)console.info('[Tozzo] Ofensores: '+SEMDATA+' linha(s) com data inválida ficam fora dos filtros de período');
+}
+const br=iso=>iso?iso.split('-').reverse().join('/'):'';
+function cardClick(a){
+  const k=a.dataset.ck,n=a.dataset.cv;
+  if(k==='m'){const y=+n.slice(0,4),m=+n.slice(5,7),f=n+'-01',l=n+'-'+String(new Date(y,m,0).getDate()).padStart(2,'0');
+    const f2=f<MIN?MIN:f,l2=l>MAX?MAX:l;
+    if($('di').value===f2&&$('df').value===l2){$('di').value=MIN;$('df').value=MAX}else{$('di').value=f2;$('df').value=l2}
+    draw();return}
+  const id={o:'so',p:'sp',c:'sc'}[k];$(id).value=($(id).value===n)?'':n;draw();
+}
+document.addEventListener('click',e=>{
+  const cd=e.target.closest('[data-ck]');if(cd){cardClick(cd);return}
+  for(const [k,id] of [['o','so'],['p','sp'],['t','st'],['c','sc']]){const a=e.target.closest('[data-'+k+']');if(a){const n=a.dataset[k];$(id).value=($(id).value===n)?'':n;draw();return}}
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('[data-ck]')){e.preventDefault();cardClick(e.target)}});
+['di','df','so','sp','st','sc'].forEach(i=>$(i).onchange=draw);
+let tq;$('q').oninput=()=>{clearTimeout(tq);tq=setTimeout(draw,200)};
+$('clr').onclick=()=>{if(!ROWS.length)return;$('di').value=MIN;$('df').value=MAX;['so','sp','st','sc','q'].forEach(i=>$(i).value='');draw()};
+$('rf').onclick=()=>TozzoData.reload(KEY);
+
+/* ---------- resumo para a Página Inicial (somente leitura) ---------- */
+/* Pessoas p/ a aba Ranking (somente leitura): gestão → gestor (coluna Gestor) e motorista (coluna Condutor); motoristas → motorista. Nome em branco não entra. */
+let VER=0;
+window.TozzoPessoas=function(v){
+  if(ERRMAP||!ROWS.length)return{pronto:false};if(v===VER)return{pronto:true,same:true,ver:VER};
+  const ok=n=>n&&n.charAt(0)!=='('&&n!=='-';
+  const o={pronto:true,ver:VER};
+  if(GE){o.gestor=ROWS.filter(r=>ok(r.o)).map(r=>({n:r.o,d:r.d,w:r.w}));o.motorista=ROWS.filter(r=>ok(r.cn)).map(r=>({n:r.cn,d:r.d,w:r.w}))}
+  else o.motorista=ROWS.filter(r=>ok(r.o)).map(r=>({n:r.rn,d:r.d,w:r.w}));
+  return o;
+};
+window.TozzoResumo=function(ini,fim){
+  if(ERRMAP)return{pronto:false,erro:1};
+  if(!ROWS.length)return{pronto:false};
+  const rows=ROWS.filter(r=>!r.d||((!ini||r.d>=ini)&&(!fim||r.d<=fim)));
+  const O=agg(rows,'o');
+  return{pronto:true,vazio:!O.length,nome:O.length?O[0][0]:'',valor:O.length?O[0][1]:0,total:rows.reduce((s,r)=>s+r.w,0),min:MIN,max:MAX,nota:'maior ofensor'};
+};
+
+TozzoData.start(KEY,{required:GE?['gestor','operacao','data']:['placa','data','ocorrencia'],onData:function(text){
+  const a=parseCsv(text);
+  if(a.length<2)throw new Error('A planilha não tem linhas de dados.');
+  H=a[0].map(x=>String(x).trim());if(!GE&&!H[0])H[0]='Motorista';DATA=a.slice(1);
+  detect();build(!!ROWS.length);VER++;
+}});
+</script></body></html>

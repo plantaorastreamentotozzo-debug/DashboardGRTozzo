@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Esquadrão Tozzo | Gerenciamento de Risco</title>
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Design System Transportes Tozzo — somente apresentação */
+:root{--g:#0B5E3B;--g2:#2E7D4F;--soft:#A8D6A7;--light:#EAF5EF;--text:#1F2A24;--muted:#6B7A72;--line:#DCE8E0;--side:264px;
+--shadow:0 1px 2px rgba(11,94,59,.05),0 6px 18px rgba(11,94,59,.06);
+--logo:url(assets/tozzo-logo.png);font-family:"Inter","Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+html{height:100%}
+*{box-sizing:border-box}
+body{margin:0;height:100%;display:flex;background:#fff;color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+.logo{background:var(--logo) center/contain no-repeat;flex:none}
+/* ---------- Menu lateral ---------- */
+.side{width:var(--side);flex:none;height:100%;background:var(--g);color:#fff;display:flex;flex-direction:column;padding:20px 14px;overflow-y:auto;z-index:30}
+.brand{display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:0 0 18px;border-bottom:1px solid rgba(255,255,255,.16);margin-bottom:16px}
+.brand .logo{width:100%;height:96px;background-color:#fff;border-radius:12px;background-origin:content-box;padding:10px 14px}
+.brand b{display:block;font-size:1.05rem;line-height:1.25;font-weight:700;color:#fff;text-align:center;letter-spacing:.01em}
+.brand small{display:block;font-size:.72rem;opacity:.75;font-weight:400}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;color:#fff;text-decoration:none;font-size:.9rem;font-weight:500;cursor:pointer;transition:background .15s}
+.nav a svg{width:20px;height:20px;flex:none;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.nav a:hover{background:rgba(255,255,255,.1)}
+.nav a.on{background:var(--g2);font-weight:600}
+.nav a:focus-visible{outline:2px solid var(--soft);outline-offset:2px}
+.side .foot{margin-top:auto;padding:16px 8px 0;font-size:.72rem;opacity:.7}
+.scrim{display:none}
+/* ---------- Área principal ---------- */
+.main{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;background:#fff}
+.topm{display:none;align-items:center;gap:12px;padding:10px 16px;background:var(--g);color:#fff;flex:none}
+.topm button{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:10px;width:40px;height:40px;font-size:1.3rem;cursor:pointer}
+.topm strong{font-size:1rem}
+.view{display:none}
+.view.on{display:block}
+#inicio.on{display:block;overflow:auto;flex:1}
+.head{padding:36px 40px 8px;max-width:1280px;margin:0 auto}
+.head h1{margin:0;font-size:clamp(1.5rem,3vw,2rem);color:var(--g);font-weight:700;letter-spacing:-.02em}
+.head p{margin:6px 0 0;color:var(--muted);font-size:.95rem}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 40px 56px}
+.grid{display:grid;grid-template-columns:1fr;gap:20px}@media(min-width:620px){.grid{grid-template-columns:repeat(2,1fr)}}@media(min-width:1280px){.grid{grid-template-columns:repeat(4,1fr)}}
+.tile{display:flex;flex-direction:column;gap:8px;width:100%;min-height:170px;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;cursor:pointer;color:var(--text);font:inherit;box-shadow:var(--shadow);transition:transform .18s,border-color .18s,background .18s}
+.tile:hover,.tile:focus-visible{transform:translateY(-3px);border-color:var(--g2);background:var(--light);outline:none}
+.tile .ic{width:40px;height:40px;border-radius:10px;background:var(--light);display:grid;place-items:center}
+.tile .ic svg{width:22px;height:22px;stroke:var(--g);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tile b{font-size:1.05rem;color:var(--g);font-weight:600}
+.tile span{color:var(--muted);font-size:.88rem}
+.tile i{margin-top:auto;align-self:flex-start;font-style:normal;font-weight:600;font-size:.82rem;color:var(--g);border:1px solid var(--soft);background:#fff;border-radius:999px;padding:5px 16px}
+.tile:hover i{background:var(--g);color:#fff;border-color:var(--g)}
+
+/* ---------- Página Inicial inteligente (resumo executivo) ---------- */
+.pbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:20px}
+.pbar .f{display:flex;flex-direction:column;gap:4px}
+.pbar label{font-size:.75rem;color:var(--muted);font-weight:500}
+.pbar input[type=date]{font:inherit;font-size:.85rem;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.pbar input[type=date]:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(168,214,167,.55)}
+.pbar .qk{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+.pbar .qk button{font:inherit;font-size:.82rem;font-weight:600;color:var(--g);background:#fff;border:1px solid var(--soft);border-radius:10px;padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+.pbar .qk button:hover{background:var(--light);border-color:var(--g2)}
+.pbar .qk button.on{background:var(--g);color:#fff;border-color:var(--g)}
+.pbar .upd{font:inherit;font-size:.85rem;font-weight:600;color:#fff;background:var(--g);border:1px solid var(--g);border-radius:10px;padding:9px 16px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.pbar .upd:hover{background:var(--g2);border-color:var(--g2)}
+.pbar .upd:disabled{opacity:.7;cursor:progress}
+.pbar .upd svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pbar .upd.go svg{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.pinfo{font-size:.82rem;color:var(--muted);margin:-8px 0 16px}
+.tile.smart{min-height:210px}
+.tile.smart .lb{font-size:.72rem;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.tile.smart .lb .ic{width:34px;height:34px;border-radius:9px}
+.tile.smart .lb .ic svg{width:19px;height:19px}
+.tile.smart .big{font-size:2.3rem;font-weight:700;color:var(--g);line-height:1.1;letter-spacing:-.02em;margin-top:8px}
+.tile.smart .big.cur{font-size:1.7rem}
+.tile.smart .nm{font-size:1.02rem;font-weight:600;color:var(--text);line-height:1.3;word-break:break-word}
+.tile.smart .sb{font-size:.78rem;color:var(--muted)}
+.tile.smart .lb{order:0}.tile.smart .nm{order:1}.tile.smart .big{order:2}.tile.smart .sb{order:3}.tile.smart i{order:4}
+.tile.smart .nm{font-size:1.5rem;font-weight:700;color:var(--g);line-height:1.2;margin-top:8px}
+.tile.smart .big,.tile.smart .big.cur{font-size:1.15rem;font-weight:600;color:#000;margin-top:0;letter-spacing:0}
+.tile.smart.load .nm,.tile.smart.vz .nm,.tile.smart.err .nm{font-size:1rem;font-weight:600;color:var(--text)}
+.tile.smart.load .big,.tile.smart.err .big,.tile.smart.vz .big{font-size:1.1rem;color:var(--muted);font-weight:600}
+.tile.smart.err .big{color:#C62828}
+/* Assinatura discreta, fixa no canto inferior direito de todas as telas */
+.assina{position:fixed;right:12px;bottom:6px;z-index:50;font-size:11px;font-style:italic;color:#000;opacity:.5;pointer-events:none;user-select:none;line-height:1}
+/* ---------- Barra de cada painel ---------- */
+.panel{display:flex;flex-direction:column;position:fixed;left:-30000px;top:0;width:1280px;height:900px;visibility:hidden;pointer-events:none}
+.panel.on{display:flex;flex-direction:column;position:static;width:auto;height:auto;visibility:visible;pointer-events:auto;flex:1;min-height:0}
+.bar{display:flex;align-items:center;gap:14px;padding:12px 24px;background:#fff;border-bottom:1px solid var(--line);flex:none;flex-wrap:wrap}
+.bar strong{font-size:1.1rem;flex:1;color:var(--g);font-weight:700;min-width:140px;display:flex;align-items:center;gap:10px}
+.bar strong svg{width:22px;height:22px;flex:none;stroke:var(--g);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.back{background:var(--g);color:#fff;border:1px solid var(--g);border-radius:10px;padding:8px 20px;font:inherit;font-weight:600;font-size:.85rem;cursor:pointer;transition:background .15s}
+.back:hover,.back:focus-visible{background:var(--g2);border-color:var(--g2);outline:none}
+.fonte{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);background:var(--light);border:1px solid var(--soft);border-radius:999px;padding:5px 14px;white-space:nowrap}
+.fonte i{width:9px;height:9px;border-radius:50%;background:#9AA8A0;display:inline-block}
+.fonte.live i{background:var(--g2);box-shadow:0 0 0 3px rgba(46,125,79,.22)}
+.fonte.emb i{background:#E0A93B}
+.fonte.vazio i{background:#C62828}
+iframe{flex:1;width:100%;border:0;min-height:0;background:#fff}
+/* ---------- Responsivo ---------- */
+@media(max-width:1100px){:root{--side:224px}.head{padding:28px 24px 4px}.wrap{padding:20px 24px 40px}}
+@media(max-width:860px){
+  body{flex-direction:column}
+  .topm{display:flex}
+  .side{position:fixed;left:0;top:0;bottom:0;width:272px;transform:translateX(-102%);transition:transform .22s;box-shadow:6px 0 24px rgba(0,0,0,.25)}
+  body.menu .side{transform:none}
+  body.menu .scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20}
+  .main{height:auto;flex:1;min-height:0}
+  .bar{padding:10px 16px}
+  .fonte{white-space:normal;font-size:.72rem}
+}
+@media(max-width:560px){.head{padding:22px 16px 0}.wrap{padding:16px 16px 32px}}
+</style>
+</head>
+<body>
+<aside class="side" id="side" aria-label="Menu principal">
+  <div class="brand"><div class="logo" role="img" aria-label="Transportes Tozzo"></div><b>Gerenciamento de Risco</b></div>
+  <nav class="nav"><a role="button" tabindex="0" data-go="inicio" id="nav-inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Início</span></a><a role="button" tabindex="0" data-go="cameras" id="nav-cameras"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h12a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M17 12l4-2v6l-4-2"/></svg><span>Alertas Câmeras</span></a><a role="button" tabindex="0" data-go="sensores" id="nav-sensores"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5a10 10 0 0114 0"/><path d="M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1"/></svg><span>Problema em Sensores</span></a><a role="button" tabindex="0" data-go="alertasgr" id="nav-alertasgr"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg><span>Alertas GR</span></a><a role="button" tabindex="0" data-go="ofensoresgestao" id="nav-ofensoresgestao"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>Ofensores Gestão</span></a><a role="button" tabindex="0" data-go="ofensoresmotoristas" id="nav-ofensoresmotoristas"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v7"/><path d="M4.5 16l6-2.5"/><path d="M19.5 16l-6-2.5"/></svg><span>Ofensores Motoristas</span></a><a role="button" tabindex="0" data-go="velocidade" id="nav-velocidade"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.9 19a9 9 0 1114.2 0"/><path d="M12 13l4-5"/><circle cx="12" cy="14" r="1.2"/></svg><span>Velocidade Excedida</span></a><a role="button" tabindex="0" data-go="ranking" id="nav-ranking"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 01-10 0z"/><path d="M17 5h3v2a3 3 0 01-3 3"/><path d="M7 5H4v2a3 3 0 003 3"/></svg><span>Ranking</span></a><a role="button" tabindex="0" data-go="financeiro" id="nav-financeiro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg><span>Dashboard Financeiro</span></a></nav>
+  <div class="foot">Transportes Tozzo</div>
+</aside>
+<div class="scrim" id="scrim"></div>
+<div class="main">
+<div class="topm"><button id="burger" aria-label="Abrir menu" aria-expanded="false">&#9776;</button><strong>Gerenciamento de Risco</strong></div>
+<section id="inicio" class="view on">
+  <div class="head"><h1>Gerenciamento de Risco</h1><p>Resumo executivo da operação — o maior indicador de cada módulo, calculado automaticamente a partir dos dados reais.</p></div>
+  <div class="wrap">
+  <div class="pbar" role="group" aria-label="Filtro global de período">
+    <div class="f"><label for="pIni">Data inicial</label><input type="date" id="pIni"></div>
+    <div class="f"><label for="pFim">Data final</label><input type="date" id="pFim"></div>
+    <div class="qk"><button type="button" data-q="mes">Mês atual</button><button type="button" data-q="ant">Mês anterior</button><button type="button" data-q="30">Últimos 30 dias</button><button type="button" data-q="all" class="on">Todo o período</button></div>
+    <button type="button" id="atualizar" class="upd" title="Busca de novo os dados de todas as planilhas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 4v5h-5"/></svg><span>Atualizar</span></button>
+  </div>
+  <div class="grid">
+    <button class="tile smart load" data-go="cameras" id="rs-cameras"><div class="lb"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h12a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M17 12l4-2v6l-4-2"/></svg></div>Alertas Câmeras</div><div class="big">Carregando…</div><div class="nm"></div><div class="sb"></div><i>Abrir painel</i></button>
+    <button class="tile smart load" data-go="sensores" id="rs-sensores"><div class="lb"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5a10 10 0 0114 0"/><path d="M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1"/></svg></div>Problemas em Sensores</div><div class="big">Carregando…</div><div class="nm"></div><div class="sb"></div><i>Abrir painel</i></button>
+    <button class="tile smart load" data-go="alertasgr" id="rs-alertasgr"><div class="lb"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></div>Alertas GR</div><div class="big">Carregando…</div><div class="nm"></div><div class="sb"></div><i>Abrir painel</i></button>
+    <button class="tile smart load" data-go="ofensoresgestao" id="rs-ofensoresgestao"><div class="lb"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>Ofensores Gestão</div><div class="big">Carregando…</div><div class="nm"></div><div class="sb"></div><i>Abrir painel</i></button>
+    <button class="tile smart load" data-go="ofensoresmotoristas" id="rs-ofensoresmotoristas"><div class="lb"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v7"/><path d="M4.5 16l6-2.5"/><path d="M19.5 16l-6-2.5"/></svg></div>Ofensores Motoristas</div><div class="big">Carregando…</div><div class="nm"></div><div class="sb"></div><i>Abrir painel</i></button>
+    <button class="tile smart load" data-go="velocidade" id="rs-velocidade"><div class="lb"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.9 19a9 9 0 1114.2 0"/><path d="M12 13l4-5"/><circle cx="12" cy="14" r="1.2"/></svg></div>Velocidade Excedida</div><div class="big">Carregando…</div><div class="nm"></div><div class="sb"></div><i>Abrir painel</i></button>
+    <button class="tile smart load" data-go="financeiro" id="rs-financeiro"><div class="lb"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></div>Maior Categoria</div><div class="big">Carregando…</div><div class="nm"></div><div class="sb"></div><i>Abrir painel</i></button>
+  </div></div>
+</section>
+
+<section id="cameras" class="view panel">
+  <div class="bar"><strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h12a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M17 12l4-2v6l-4-2"/></svg>Alertas Câmeras</strong><button class="back" data-go="inicio">Voltar</button></div>
+  <iframe id="f-cameras" title="Alertas Câmeras"></iframe>
+</section>
+<section id="sensores" class="view panel">
+  <div class="bar"><strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5a10 10 0 0114 0"/><path d="M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1"/></svg>Problema em Sensores</strong><button class="back" data-go="inicio">Voltar</button></div>
+  <iframe id="f-sensores" title="Problema em Sensores"></iframe>
+</section>
+<section id="alertasgr" class="view panel">
+  <div class="bar"><strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>Alertas GR</strong><button class="back" data-go="inicio">Voltar</button></div>
+  <iframe id="f-alertasgr" title="Alertas GR"></iframe>
+</section>
+<section id="ofensoresgestao" class="view panel">
+  <div class="bar"><strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Ofensores Gestão</strong><button class="back" data-go="inicio">Voltar</button></div>
+  <iframe id="f-ofensoresgestao" title="Ofensores Gestão"></iframe>
+</section>
+<section id="ofensoresmotoristas" class="view panel">
+  <div class="bar"><strong><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v7"/><path d="M4.5 16l6-2.5"/><path d="M19.5 16l-6-2.5"/></svg>Ofensores Motoristas</strong><button class="back" data-go="inicio">Voltar</button></div>
+  <iframe id="f-ofensoresmotoristas" title="Ofensores Motoristas"></iframe>
+</section>
+<section id="velocidade" class="view panel">
+  <div class="bar"><strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.9 19a9 9 0 1114.2 0"/><path d="M12 13l4-5"/><circle cx="12" cy="14" r="1.2"/></svg>Velocidade Excedida</strong><button class="back" data-go="inicio">Voltar</button></div>
+  <iframe id="f-velocidade" title="Velocidade Excedida"></iframe>
+</section>
+<section id="ranking" class="view panel">
+  <div class="bar"><strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 01-10 0z"/><path d="M17 5h3v2a3 3 0 01-3 3"/><path d="M7 5H4v2a3 3 0 003 3"/></svg>Ranking</strong><button class="back" data-go="inicio">Voltar</button></div>
+  <iframe id="f-ranking" title="Ranking"></iframe>
+</section>
+<section id="financeiro" class="view panel">
+  <div class="bar"><strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>Dashboard Financeiro</strong><button class="back" data-go="inicio">Voltar</button></div>
+  <iframe id="f-financeiro" title="Dashboard Financeiro"></iframe>
+</section>
+
+</div>
+<div class="assina">Developed by Gustavo Everling</div>
+<script>
+var PAINEIS={cameras:'panels/cameras.html',sensores:'panels/sensores.html',financeiro:'panels/financeiro.html',alertasgr:'panels/alertas-gr.html',ofensoresgestao:'panels/ofensores.html?k=gestao',ofensoresmotoristas:'panels/ofensores.html?k=motoristas',ranking:'panels/ranking.html',velocidade:'panels/velocidade.html'};
+function fmt(ts){var d=new Date(ts);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR')}
+/* Botão Atualizar: pede a cada painel que busque os dados de novo e libera o botão quando todos responderem */
+var UPD=null;
+function updFim(){if(!UPD)return;clearTimeout(UPD.t);UPD=null;var b=document.getElementById('atualizar');b.disabled=false;b.classList.remove('go');b.querySelector('span').textContent='Atualizar';recalc()}
+function updDone(k){if(!UPD)return;delete UPD.p[k];if(!Object.keys(UPD.p).length)setTimeout(updFim,300)}
+document.getElementById('atualizar').addEventListener('click',function(){
+  if(UPD)return;loadAll();
+  var b=this;b.disabled=true;b.classList.add('go');b.querySelector('span').textContent='Atualizando…';
+  UPD={p:{},t:setTimeout(updFim,150000)};
+  ['cameras','sensores','alertasgr','ofensoresgestao','ofensoresmotoristas','velocidade','financeiro'].forEach(function(k){
+    var f=document.getElementById('f-'+k);
+    try{if(f&&f.contentWindow&&f.contentWindow.TozzoData){UPD.p[k]=1;f.contentWindow.TozzoData.reload(k)}}catch(e){}
+  });
+  if(!Object.keys(UPD.p).length)updFim();
+});
+window.addEventListener('message',function(e){
+  var d=e.data;if(e.origin!==location.origin||!d||d.tozzo!==2)return;
+  ST[d.painel]=d.modo;if(d.modo!=='carregando')updDone(d.painel);if(d.modo==='api'||d.modo==='csv'||d.modo==='erro'||d.modo==='vazio')agenda(150);var el=document.getElementById('fonte-'+d.painel);if(!el)return;
+  var t='',c='';
+  if(d.modo==='api'){t='Ao vivo · API Google Sheets · '+fmt(d.ts);c='live'}
+  else if(d.modo==='csv'){t='Fonte reserva · Link publicado · '+fmt(d.ts);c='emb'}
+  else if(d.modo==='carregando'){t='Carregando dados…';c='emb'}
+  else if(d.modo==='desatualizado'){t='Falha ao atualizar · últimos dados mantidos';c='emb'}
+  else if(d.modo==='vazio'){t='Planilha sem dados ou incompleta';c='emb'}
+  else{t='Fonte de dados indisponível';c='vazio'}
+  el.className='fonte '+c;el.querySelector('b').textContent=t;
+});
+
+/* ===== Página Inicial inteligente: lê o resumo calculado por cada painel (window.TozzoResumo) ===== */
+function loadAll(){Object.keys(PAINEIS).forEach(function(k){var f=document.getElementById('f-'+k);if(f&&!f.getAttribute('src'))f.setAttribute('src',PAINEIS[k])})}
+var NUM=function(n){return Number(n).toLocaleString('pt-BR')};
+var BRL=function(n){return Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})};
+var BR=function(iso){return iso?iso.split('-').reverse().join('/'):''};
+var ST={};  /* último estado informado por cada painel (api/csv/erro/vazio…) */
+function setCard(id,cls,big,nm,sb,bigCls){
+  var el=document.getElementById('rs-'+id);if(!el)return;
+  el.className='tile smart '+cls;
+  var b=el.querySelector('.big');b.textContent=big;b.className='big'+(bigCls?' '+bigCls:'');
+  el.querySelector('.nm').textContent=nm||'';el.querySelector('.sb').textContent=sb||'';
+}
+var PER={ini:'',fim:''},LIM={};
+function resumo(id){
+  var f=document.getElementById('f-'+id),r=null;
+  try{r=f&&f.contentWindow&&f.contentWindow.TozzoResumo?f.contentWindow.TozzoResumo(PER.ini,PER.fim):null}catch(e){r={erro:1}}
+  var m=ST[id];
+  if(!r||r.pronto===false){
+    if(m==='erro'||m==='vazio'||(r&&r.erro))setCard(id,'err','Indisponível','Dados não disponíveis','Verifique a fonte de dados deste painel.');
+    else setCard(id,'load','Carregando…','','');
+    return r&&r.pronto;
+  }
+  if(r.min&&(!LIM.min||r.min<LIM.min))LIM.min=r.min;if(r.max&&(!LIM.max||r.max>LIM.max))LIM.max=r.max;
+  if(r.vazio){setCard(id,'vz','Sem dados','Nenhum registro no período selecionado','');return true}
+  if(id==='financeiro')setCard(id,'',BRL(r.valor),r.nome,'Total no período: '+BRL(r.total)+' · '+r.nota,'cur');
+  else setCard(id,'',NUM(r.valor),r.nome,'de '+NUM(r.total)+' no período · '+r.nota);
+  return true;
+}
+function recalc(){
+  LIM={};var ok=true;
+  Object.keys(PAINEIS).forEach(function(k){if(k==='ranking')return;if(!resumo(k))ok=false});
+  if(!PER.ini&&!PER.fim&&LIM.min){document.getElementById('pIni').value=LIM.min;document.getElementById('pFim').value=LIM.max}
+  return ok;
+}
+var tmr=null;function agenda(ms){clearTimeout(tmr);tmr=setTimeout(recalc,ms||80)}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function setPer(a,b,q){
+  PER.ini=a;PER.fim=b;document.getElementById('pIni').value=a;document.getElementById('pFim').value=b;
+  document.querySelectorAll('.pbar .qk button').forEach(function(x){x.classList.toggle('on',x.getAttribute('data-q')===q)});recalc();
+}
+document.querySelectorAll('.pbar .qk button').forEach(function(bt){bt.addEventListener('click',function(){
+  var q=bt.getAttribute('data-q'),n=new Date(),y=n.getFullYear(),m=n.getMonth();
+  if(q==='all')setPer('','',q);
+  else if(q==='mes')setPer(iso(new Date(y,m,1)),iso(new Date(y,m+1,0)),q);
+  else if(q==='ant')setPer(iso(new Date(y,m-1,1)),iso(new Date(y,m,0)),q);
+  else{var a=new Date(n);a.setDate(a.getDate()-29);setPer(iso(a),iso(n),q)}
+})});
+['pIni','pFim'].forEach(function(i){document.getElementById(i).addEventListener('change',function(){
+  var a=document.getElementById('pIni').value,b=document.getElementById('pFim').value;
+  if(a&&b&&a>b){var t=a;a=b;b=t}
+  setPer(a,b,'');
+})});
+var poll=setInterval(function(){if(recalc()){clearInterval(poll)}},1500);
+setTimeout(function(){clearInterval(poll)},120000);
+function show(id){
+  if(!PAINEIS[id]&&id!=='inicio')id='inicio';
+  document.querySelectorAll('.nav a').forEach(function(n){n.classList.toggle('on',n.getAttribute('data-go')===id)});
+  document.body.classList.remove('menu');
+  document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on',v.id===id)});
+  loadAll();
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-go]');if(!b)return;
+  var id=b.getAttribute('data-go');location.hash=(id==='inicio')?'':id;
+});
+document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('.nav a')){e.preventDefault();e.target.click()}});
+var bg=document.getElementById('burger');
+bg.addEventListener('click',function(){var o=document.body.classList.toggle('menu');bg.setAttribute('aria-expanded',o)});
+document.getElementById('scrim').addEventListener('click',function(){document.body.classList.remove('menu')});
+window.addEventListener('hashchange',function(){show(location.hash.slice(1)||'inicio')});
+show(location.hash.slice(1)||'inicio');
+loadAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Financeiro – Gerenciamento de Riscos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#FFFFFF;--card:#FFFFFF;--tx:#10241A;--mu:#587065;--bd:#CFE0D5;--pr:#007D3A;--up:#dc2626;--dn:#16a34a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="dark"]{--bg:#0e1420;--card:#172033;--tx:#e8edf7;--mu:#93a0b8;--bd:#26324a;--pr:#60a5fa;--up:#f87171;--dn:#4ade80}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:1200px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px}
+h1{font-size:20px;margin:0}h1 small{display:block;color:var(--mu);font-size:13px;font-weight:400}
+.btn{background:var(--pr);color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;font-size:14px}
+.btn.g{background:transparent;color:var(--pr);border:1px solid var(--pr)}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end;margin-bottom:14px}
+label{font-size:12px;color:var(--mu);font-weight:600;display:block;margin-bottom:3px}
+select,input[type=date]{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.k{font-size:12px;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.v{font-size:24px;font-weight:700;margin-top:4px;overflow-wrap:anywhere}.s{font-size:12px;color:var(--mu);overflow-wrap:anywhere}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;margin-bottom:12px}
+.grid .wide{grid-column:1/-1}
+h2{font-size:14px;margin:0 0 8px;text-transform:uppercase;letter-spacing:.03em}
+.ch{position:relative;height:280px}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;text-align:center}
+.cmp b{display:block;font-size:20px}.cmp span{font-size:12px;color:var(--mu);font-weight:600;text-transform:uppercase}
+.up{color:var(--up)}.dn{color:var(--dn)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}td,th{padding:6px 4px;border-bottom:1px solid var(--bd);text-align:left}td:last-child,th:last-child{text-align:right}
+.ov{text-align:center;padding:40px 16px}.ov p{color:var(--mu);max-width:520px;margin:8px auto 16px}
+.hint{font-size:12px;color:var(--mu);margin-top:6px}
+.hide{display:none!important}
+header{background:linear-gradient(90deg,#052A18,#007D3A);color:#fff;border-bottom:4px solid #C7D30A;border-radius:12px;padding:14px 18px}header h1,header h2,header .mu,header small,header label{color:#fff}header .btn,header button{background:#C7D30A;color:#052A18;border-color:#C7D30A}header .btn.g,header button.sec{background:transparent;color:#fff;border:1px solid #fff}h2{color:#007D3A}.cards .box{border-top:3px solid #C7D30A}th{color:#007D3A}select:focus,input:focus{outline:2px solid #C7D30A}
+:root{--px:max(clamp(16px,4vw,40px),calc((100vw - 1180px)/2));}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:1rem;line-height:1.4}
+.w{max-width:none;padding:0 var(--px) 60px}
+header{margin:0 calc(-1*var(--px)) 20px;padding:20px var(--px) 16px;border-radius:0;border-bottom:4px solid #C7D30A}
+h1{font-size:1.15rem;font-weight:650}
+h1 small{font-size:.85rem}
+.box{border-radius:8px;padding:12px 14px}
+.cards{gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:22px}
+.cards .box{border-top:3px solid #C7D30A}
+.k{font-size:.75rem;font-weight:400;text-transform:none;letter-spacing:0}
+.v{font-size:1.5rem;font-weight:650;margin-top:2px}
+.s{font-size:.75rem}
+h2{font-size:.95rem;font-weight:650;text-transform:none;letter-spacing:0;margin:0 0 10px;color:var(--tx)}
+.filters{gap:8px;margin-bottom:16px}
+label{font-size:.75rem;font-weight:400;color:var(--mu)}
+select,input[type=date]{border-radius:6px;padding:7px 10px;font-size:.82rem;background:#FFFFFF}
+.btn{border-radius:6px;padding:7px 14px;font-size:.82rem;font-weight:600}
+.btn.g{background:transparent;border:1px solid var(--bd);color:var(--tx)}
+header .btn{background:#C7D30A;color:#052A18;border:1px solid #C7D30A}
+header .btn.g{background:transparent;color:#fff;border:1px solid #fff}
+.grid{gap:16px}
+.cmp b{font-size:1.25rem;font-weight:650}
+.cmp span{font-size:.75rem;font-weight:400;text-transform:none}
+table{font-size:.8rem}
+th,td{padding:8px 10px}
+th{background:#EAF4EE;color:var(--mu);font-weight:600;font-size:.8rem;text-transform:none}
+</style><script src="../js/config.js"></script>
+<script src="../js/data-source.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/tozzo-theme.css">
+</head><body><div class="w">
+<header style="justify-content:flex-end">
+<div><span id="info" class="s"></span>
+<input id="fi" type="file" accept=".xlsx,.xls,.csv" class="hide"></div></header>
+
+<div id="empty" class="box ov"><h2>Carregando os dados da planilha…</h2>
+<p>Os números vêm da planilha compartilhada e são atualizados automaticamente.</p>
+<div id="err" class="hint up"></div></div>
+
+<div id="app" class="hide">
+<div class="box filters">
+<div><label>De</label><input type="date" id="from"></div><div><label>Até</label><input type="date" id="to"></div>
+<div><label>Ano</label><select id="year"></select></div><div><label>Mês</label><select id="month"></select></div>
+<div><label>Categoria</label><select id="cat"></select></div><div><label>Fornecedor</label><select id="sup"></select></div>
+<div><button class="btn" style="width:100%" onclick="clr()">LIMPAR FILTROS</button></div></div>
+
+<div class="cards" id="cards"></div>
+
+<div class="grid">
+<div class="box wide"><h2>Gastos por mês</h2><div class="ch"><canvas id="c1"></canvas></div></div>
+<div class="box wide"><h2>Gastos por categoria</h2><div class="ch" style="height:320px"><canvas id="c2"></canvas></div><div class="hint">Clique em uma barra para filtrar.</div></div>
+<div class="box wide"><h2>Gastos por fornecedor (Top 10)</h2><div class="ch" style="height:420px"><canvas id="c3"></canvas></div><div class="hint">Clique em uma barra para filtrar.</div></div>
+<div class="box wide"><h2>Comparação com mês anterior</h2><div id="cmp"></div></div>
+</div><details class="box" id="clsw"><summary><b>Classificar fornecedores por categoria</b></summary><div class="hint">A planilha não tem coluna de categoria. Defina a categoria de cada fornecedor (salvo neste navegador); o que não for classificado fica em "Sem categoria".</div><div id="cls"></div></details></div></div>
+
+<script>
+const $=id=>document.getElementById(id),M=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const K=v=>{const a=Math.abs(v),f=(x,s)=>'R$ '+x.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+s;return a>=1e9?f(v/1e9,' Bi'):a>=1e6?f(v/1e6,' Mi'):a>=1e3?f(v/1e3,' Mil'):f(v,'')};
+const R=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const norm=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+let RAW=[],ch={},F={};
+const pd=v=>{let d=null;
+ if(v instanceof Date&&!isNaN(v))d=new Date(v.getTime()+432e5);
+ else if(typeof v==='number')d=new Date(Math.round((v-25569)*864e5));
+ else{const s=String(v).trim();let m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/);
+  if(m){let y=+m[3];if(y<100)y+=2000;d=new Date(Date.UTC(y,m[2]-1,+m[1]))}
+  else if(m=s.match(/^(\d{4})-(\d{2})-(\d{2})/))d=new Date(Date.UTC(+m[1],m[2]-1,+m[3]))}
+ return d&&!isNaN(d)?d.toISOString().slice(0,10):null};
+const pv=v=>{if(typeof v==='number')return v;let s=String(v).replace(/[^\d,.-]/g,'');if(!s)return NaN;
+ if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');return parseFloat(s)};
+$('fi').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{load(XLSX.read(r.result,{type:'array',cellDates:true}),f.name)}catch(x){$('err').textContent='Não foi possível ler o arquivo.'}};r.readAsArrayBuffer(f);e.target.value=''};
+const CATS=['Gerenciadoras de Risco (GR)','Rastreador','Câmeras','KTM','Carros','Escoltas','Manutenção Câmeras e KTM','TR TRUCK'],SC='Sem categoria';
+/* ATENÇÃO: a classificação manual de fornecedores (gr_map) fica salva só neste navegador/dispositivo (localStorage). Não é um banco de dados e não é compartilhada entre usuários. */
+let MAP={};try{MAP=JSON.parse(localStorage.getItem('gr_map')||'{}')}catch(e){}
+const guess=f=>{const n=norm(f);if(/trucks control/.test(n))return CATS[1];if(/^asmontec/.test(n))return CATS[2];if(/^jbs/.test(n))return CATS[0];if(/alemao auto/.test(n))return CATS[7];if(/^onofre/.test(n))return CATS[5];if(/^rodrigues, pazza/.test(n))return CATS[4];if(/risk|risco|angellira/.test(n))return CATS[0];if(/rastreador/.test(n))return CATS[1];if(/^ktm/.test(n))return CATS[3];return SC};
+const setC=()=>RAW.forEach(r=>r.c=r.x||MAP[r.f]||guess(r.f));
+function load(wb,name){const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+ const find=(o,ks)=>{for(const x of ks)for(const k in o)if(norm(k).startsWith(x))return o[k];return ''};  // respeita a prioridade da lista (ex.: 'dt. baixa' antes de 'data')
+ let skip=0;const out=[];
+ rows.forEach(o=>{const d=pd(find(o,['dt. baixa','data'])),v=pv(find(o,['vlr. baixa','valor']));
+  if(!d||isNaN(v)||v<=0){skip++;return}
+  let f=String(find(o,['fornecedor','pessoa'])).trim()||'(sem fornecedor)';if(f.startsWith('TRUCKS COMERCIO E TECNOLOGIA'))f='TRUCKS COMERCIO E TECNOLOGIA DE RASTREADORES E COMUNICACOES LTDA';
+  out.push({d,v,f,x:String(find(o,['categoria'])).trim()})});
+ if(!out.length){$('err').textContent='Nenhuma linha válida. Verifique as colunas de data e valor.';return}
+ ingest(out,name+' · '+out.length+' pagamentos'+(skip?' ('+skip+' sem baixa ignorados)':''))}
+function ingest(a,info){RAW=a;setC();$('empty').classList.add('hide');$('app').classList.remove('hide');$('info').textContent='';console.info('[Tozzo] Financeiro: '+info);fill();cls();clr()}
+function cls(){const t=grp(RAW,'f');$('clsw').classList.toggle('hide',RAW.some(r=>r.x));
+ $('cls').innerHTML='<table>'+t.map(([f,v])=>'<tr><td>'+f+'</td><td>'+R(v)+'</td><td><select data-f="'+f.replace(/"/g,'&quot;')+'">'+[...CATS,SC].map(c=>'<option'+(RAW.find(r=>r.f===f).c===c?' selected':'')+'>'+c+'</option>').join('')+'</select></td></tr>').join('')+'</table>';
+ $('cls').querySelectorAll('select').forEach(s=>s.onchange=()=>{MAP[s.dataset.f]=s.value;try{localStorage.setItem('gr_map',JSON.stringify(MAP))}catch(e){}setC();const c=F.cat;fill();$('cat').value=[...$('cat').options].some(o=>o.value===c)?c:'';F.cat=$('cat').value;render()})}
+const opt=(id,arr,all)=>{$(id).innerHTML='<option value="">'+all+'</option>'+arr.map(a=>'<option value="'+a[0]+'">'+a[1]+'</option>').join('')};
+function fill(){const u=k=>[...new Set(RAW.map(k))].sort();
+ opt('year',u(r=>r.d.slice(0,4)).map(y=>[y,y]),'Todos');opt('month',M.map((m,i)=>[String(i+1).padStart(2,'0'),m]),'Todos');
+ opt('cat',[...CATS,SC].filter(c=>RAW.some(r=>r.c===c)).map(x=>[x,x]),'Todas');opt('sup',u(r=>r.f).map(x=>[x,x]),'Todos')}
+['from','to','year','month','cat','sup'].forEach(k=>$(k).onchange=()=>{F[k]=$(k).value;render()});
+function clr(){F={from:'',to:'',year:'',month:'',cat:'',sup:''};for(const k in F)$(k).value='';render()}
+const pass=(r,skipPeriod)=>(skipPeriod||((!F.from||r.d>=F.from)&&(!F.to||r.d<=F.to)&&(!F.year||r.d.slice(0,4)===F.year)&&(!F.month||r.d.slice(5,7)===F.month)))&&(!F.cat||r.c===F.cat)&&(!F.sup||r.f===F.sup);
+const sum=a=>a.reduce((s,r)=>s+r.v,0);
+const grp=(a,k)=>{const m={};a.forEach(r=>m[r[k]]=(m[r[k]]||0)+r.v);return Object.entries(m).sort((x,y)=>y[1]-x[1])};
+const ym=d=>d.slice(0,7),lbl=s=>M[+s.slice(5)-1].slice(0,3)+'/'+s.slice(2,4);
+const tx=()=>getComputedStyle(document.documentElement).getPropertyValue('--mu').trim()||'#6B7A72';
+function draw(id,cfg){if(ch[id])ch[id].destroy();ch[id]=new Chart($(id),cfg)}
+const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>R(c.parsed.y??c.parsed.x)}}}};
+function render(){
+ const A=RAW.filter(r=>pass(r)),tot=sum(A),months=[...new Set(A.map(r=>ym(r.d)))].sort();
+ const gc=grp(A,'c'),gs=grp(A,'f');
+ const card=(k,v,s)=>'<div class="box"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="s">'+(s||'&nbsp;')+'</div></div>';
+ $('cards').innerHTML=card('Gasto total (toda a base)',K(sum(RAW)),R(sum(RAW))+' · '+RAW.length+' lançamentos')+
+  card('Gasto no período selecionado',K(tot),R(tot)+' · '+A.length+' lançamentos')+
+  card('Média mensal',months.length?K(tot/months.length):'—',(months.length?R(tot/months.length)+' · ':'')+months.length+' mês(es) com gastos')+
+  card('Maior categoria',gc[0]?gc[0][0]:'—',gc[0]?R(gc[0][1])+' ('+(tot?(gc[0][1]/tot*100).toFixed(1):0)+'%)':'')+
+  card('Maior fornecedor',gs[0]?gs[0][0]:'—',gs[0]?R(gs[0][1])+' ('+(tot?(gs[0][1]/tot*100).toFixed(1):0)+'%)':'');
+ const mm={};A.forEach(r=>mm[ym(r.d)]=(mm[ym(r.d)]||0)+r.v);
+ const ax={ticks:{color:tx()},grid:{color:'rgba(11,94,59,.10)'}};
+ draw('c1',{type:'line',data:{labels:months.map(lbl),datasets:[{data:months.map(m=>mm[m]),borderColor:'#0B5E3B',backgroundColor:'rgba(11,94,59,.12)',fill:true,tension:.3,pointRadius:4}]},
+  options:{...base,scales:{x:ax,y:{...ax,ticks:{color:tx(),callback:v=>R(v)}}}}});
+ const wrap=s=>{const o=[];let l='';s.split(' ').forEach(w=>{if((l+' '+w).trim().length>34){o.push(l);l=w}else l=(l+' '+w).trim()});o.push(l);return o};
+ const bar=(id,g,key,col)=>draw(id,{type:'bar',data:{labels:g.map(x=>wrap(x[0])),datasets:[{data:g.map(x=>x[1]),backgroundColor:g.map(x=>F[key]===x[0]?'#A8D6A7':col)}]},
+  options:{...base,indexAxis:'y',scales:{x:{...ax,ticks:{color:tx(),callback:v=>R(v)}},y:ax},
+  onClick:(e,el)=>{if(!el.length)return;const n=g[el[0].index][0];F[key]=F[key]===n?'':n;$(key).value=F[key];render()}}});
+ bar('c2',gc,'cat','#0B5E3B');bar('c3',gs.slice(0,10),'sup','#2E7D4F');
+ cmp(months)}
+function cmp(months){
+ const B=RAW.filter(r=>pass(r,true)),cur=months[months.length-1];
+ if(!cur){$('cmp').innerHTML='<div class="s">Sem dados para o filtro atual.</div>';return}
+ let [y,m]=cur.split('-').map(Number);m--;if(!m){m=12;y--}const prev=y+'-'+String(m).padStart(2,'0');
+ const a=B.filter(r=>ym(r.d)===cur),b=B.filter(r=>ym(r.d)===prev),ta=sum(a),tb=sum(b),df=ta-tb;
+ const nm=s=>M[+s.slice(5)-1].toUpperCase()+' '+s.slice(0,4);
+ const cl=df>0?'up':df<0?'dn':'',sg=x=>(x>0?'+':x<0?'−':'')+R(Math.abs(x)),
+  pc=tb?(df>0?'+':df<0?'−':'')+Math.abs(df/tb*100).toFixed(1).replace('.',',')+'%':'—';
+ const ca=Object.fromEntries(grp(a,'c')),cb=Object.fromEntries(grp(b,'c'));
+ const d=[...new Set([...Object.keys(ca),...Object.keys(cb)])].map(c=>[c,(ca[c]||0)-(cb[c]||0)]).filter(x=>x[1]).sort((x,y)=>y[1]-x[1]);
+ const tbl=(t,arr)=>'<div><h2 style="margin-top:14px">'+t+'</h2>'+(arr.length?'<table>'+arr.map(x=>'<tr><td>'+x[0]+'</td><td class="'+(x[1]>0?'up':'dn')+'">'+sg(x[1])+'</td></tr>').join('')+'</table>':'<div class="s">Nenhuma</div>')+'</div>';
+ $('cmp').innerHTML='<div class="cmp"><div><span>'+nm(cur)+'</span><b>'+R(ta)+'</b></div><div><span>'+nm(prev)+'</span><b>'+R(tb)+'</b></div><div><span>Variação</span><b class="'+cl+'">'+sg(df)+' | '+pc+'</b></div></div>'+
+  '<div class="grid" style="margin:0">'+tbl('Maiores aumentos',d.filter(x=>x[1]>0).slice(0,5))+tbl('Maiores reduções',d.filter(x=>x[1]<0).reverse().slice(0,5))+'</div>'+
+  '<div class="hint">Mês de referência: último mês com gastos no filtro. O mês anterior considera os filtros de categoria e fornecedor.</div>'}
+const hora=()=>new Date().toLocaleTimeString('pt-BR');
+function finApply(text){
+ const ks=['from','to','year','month','cat','sup'],keep={};ks.forEach(k=>{keep[k]=$(k).value});
+ $('err').textContent='';
+ load(XLSX.read(text,{type:'string',raw:true}),'API Google Sheets · '+hora());
+ if($('err').textContent)throw new Error($('err').textContent);
+ ks.forEach(k=>{const el=$(k);if(keep[k]){el.value=keep[k];if(el.value===keep[k])F[k]=keep[k]}});render();
+}
+/* Resumo p/ Página Inicial (somente leitura): categoria com maior valor (Vlr. Baixa por Dt. Baixa) no período */
+window.TozzoResumo=function(ini,fim){
+  if(!RAW.length)return{pronto:false};
+  const a=RAW.filter(r=>(!ini||r.d>=ini)&&(!fim||r.d<=fim)),t=grp(a,'c')[0],ds=RAW.map(r=>r.d).sort();
+  return{pronto:true,vazio:!t,nome:t?t[0]:'',valor:t?t[1]:0,total:sum(a),min:ds[0],max:ds[ds.length-1],nota:'valor de baixa'};
+};
+TozzoData.start('financeiro',{required:['pessoa','dt. emissao','dt. vencimento','dt. baixa','vlr. baixa'],warnBlank:['pessoa'],onData:finApply});
+</script></body></html>

@@ -1,0 +1,192 @@
+/* ============================================================
+   DESIGN SYSTEM — TRANSPORTES TOZZO
+   Camada SOMENTE VISUAL, carregada depois do estilo de cada painel.
+   Não contém lógica, dados nem cálculos.
+   Paleta oficial:
+     Verde Principal  #0B5E3B   Verde Secundário #2E7D4F
+     Verde Suave      #A8D6A7   Verde Claro      #EAF5EF   Branco #FFFFFF
+   ============================================================ */
+
+/* ---------- Tokens (sobrescrevem as variáveis de cada painel) ---------- */
+:root:root:root {
+  --t-green: #0B5E3B;
+  --t-green2: #2E7D4F;
+  --t-soft: #A8D6A7;
+  --t-light: #EAF5EF;
+  --t-white: #FFFFFF;
+  --t-text: #1F2A24;
+  --t-muted: #6B7A72;
+  --t-line: #DCE8E0;
+  --t-radius: 14px;
+  --t-shadow: 0 1px 2px rgba(11, 94, 59, .05), 0 6px 18px rgba(11, 94, 59, .06);
+  --t-font: "Inter", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Câmeras */
+  --bg: #FFFFFF; --card: #FFFFFF; --bd: #DCE8E0; --tx: #1F2A24; --mut: #6B7A72;
+  --am: #0B5E3B; --tl: #0B5E3B; --panel2: #EAF5EF; --accent: #0B5E3B; --lime: #A8D6A7;
+  /* Sensores */
+  --panel: #FFFFFF; --line: #DCE8E0; --text: #1F2A24; --muted: #6B7A72;
+  --ok: #2E7D4F; --warn: #B7791F; --crit: #C62828;
+  /* Financeiro */
+  --mu: #6B7A72; --pr: #0B5E3B; --up: #C62828; --dn: #2E7D4F;
+  /* Alertas GR */
+  --ac: #0B5E3B; --ac2: #EAF5EF; --wr: #C62828;
+}
+
+/* ---------- Base e tipografia ---------- */
+html, body { background: #FFFFFF !important; }
+body {
+  font-family: var(--t-font) !important;
+  color: var(--t-text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, table { font-family: inherit; }
+h1, h2, h3 { letter-spacing: -.01em; }
+h2 { color: var(--t-green) !important; font-size: 1rem; font-weight: 600; text-transform: none; }
+
+/* ---------- Cabeçalhos internos (Sensores, Financeiro, Alertas GR) ---------- */
+header {
+  background: #FFFFFF !important;
+  color: var(--t-green) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--t-line) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+header h1 { color: var(--t-green) !important; font-size: 1.2rem; font-weight: 700; }
+header h1 small, header p, header .mu, header small, header label,
+header .badge, header #status { color: var(--t-muted) !important; }
+header h2 { color: var(--t-green) !important; }
+.badge {
+  background: var(--t-light) !important; border: 1px solid var(--t-soft) !important;
+  color: var(--t-green) !important; border-radius: 999px !important;
+}
+
+/* Câmeras não tem cabeçalho: remove a faixa superior antiga */
+body::before { background: none !important; border: 0 !important; height: 4px !important; margin-bottom: 16px !important; }
+
+/* ---------- Cards ---------- */
+.card, .box, .kpi, .tw, .tablewrap, .tb, .banner {
+  background: #FFFFFF;
+  border: 1px solid var(--t-line) !important;
+  border-top: 1px solid var(--t-line) !important;
+  border-radius: var(--t-radius) !important;
+  box-shadow: var(--t-shadow);
+}
+.kpis .card, .cards .box, .kpi { border-top: 1px solid var(--t-line) !important; }
+.k1, .kpis .card.k1 { background: var(--t-light) !important; border-color: var(--t-soft) !important; }
+
+/* Títulos pequenos dos cards, com marcador simples */
+.card h3, .k, .kpi .l, .kpi .mu, .kpi > span.mu {
+  color: var(--t-muted) !important; font-size: .78rem; font-weight: 500; text-transform: none; letter-spacing: 0;
+}
+.card h3::before, .k::before {
+  content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--t-green2); margin-right: 8px; vertical-align: 1px;
+  box-shadow: 0 0 0 3px var(--t-light);
+}
+
+/* Números dos indicadores */
+.big, .k1 .big, .v, .kpi .n, .kpi b { color: var(--t-green) !important; font-weight: 700; }
+.kpi.warn .n { color: var(--warn) !important; }
+.kpi.crit .n { color: var(--crit) !important; }
+.kpi.ok .n { color: var(--t-green2) !important; }
+.sub, .kpis .sub, .s, .hint, .mu { color: var(--t-muted) !important; }
+
+/* Cards clicáveis */
+.kpi.clickable:hover, .click:hover, .click:focus-visible {
+  border-color: var(--t-green2) !important; background: var(--t-light) !important;
+}
+.kpi.active { border-color: var(--t-green) !important; box-shadow: 0 0 0 1px var(--t-green) !important; background: var(--t-light) !important; }
+
+/* ---------- Filtros ---------- */
+body > .row, .controls, .filters {
+  background: #FFFFFF;
+  border: 1px solid var(--t-line);
+  border-radius: var(--t-radius);
+  box-shadow: var(--t-shadow);
+  padding: 14px 16px;
+  gap: 12px;
+  align-items: end;
+}
+label, .filters label {
+  color: var(--t-muted) !important; font-size: .75rem; font-weight: 500; text-transform: none; letter-spacing: 0;
+}
+select, input[type=text], input[type=date], input:not([type]), input[type=search] {
+  background: #FFFFFF !important; color: var(--t-text) !important;
+  border: 1px solid var(--t-line) !important; border-radius: 10px !important;
+  padding: 8px 12px; font-size: .85rem; transition: border-color .15s, box-shadow .15s;
+}
+select:hover, input:hover { border-color: var(--t-soft) !important; }
+select:focus, input:focus {
+  outline: none !important; border-color: var(--t-green2) !important;
+  box-shadow: 0 0 0 3px rgba(168, 214, 167, .55) !important;
+}
+
+/* ---------- Botões ---------- */
+/* secundário (padrão): fundo branco, borda #A8D6A7, texto #0B5E3B */
+button, .btn.g, button.ghost, button.sec, .pg button {
+  background: #FFFFFF !important; color: var(--t-green) !important;
+  border: 1px solid var(--t-soft) !important; border-radius: 10px !important;
+  padding: 8px 16px; font-size: .85rem; font-weight: 600; cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+button:hover, .btn.g:hover, button.ghost:hover, button.sec:hover, .pg button:hover {
+  background: var(--t-light) !important; border-color: var(--t-green2) !important; color: var(--t-green) !important;
+}
+button:disabled { opacity: .45; cursor: default; }
+/* principal: #0B5E3B, hover #2E7D4F */
+#rf, #bAp, #refreshBtn, .btn:not(.g), .banner button, .back, #tozzo-ov button {
+  background: var(--t-green) !important; color: #FFFFFF !important;
+  border: 1px solid var(--t-green) !important;
+}
+#rf:hover, #bAp:hover, #refreshBtn:hover, .btn:not(.g):hover, .banner button:hover, .back:hover, #tozzo-ov button:hover {
+  background: var(--t-green2) !important; border-color: var(--t-green2) !important; color: #FFFFFF !important;
+}
+header .btn, header button { background: var(--t-green) !important; color: #fff !important; border-color: var(--t-green) !important; }
+header .btn.g, header button.sec { background: #fff !important; color: var(--t-green) !important; border: 1px solid var(--t-soft) !important; }
+/* botão alternável (Câmeras) */
+#sr[aria-pressed=true] { background: var(--t-light) !important; border-color: var(--t-green) !important; color: var(--t-green) !important; }
+.chip { background: var(--t-light) !important; color: var(--t-green) !important; }
+
+/* ---------- Tabelas ---------- */
+table { background: #FFFFFF; border-collapse: collapse; }
+th {
+  background: var(--t-light) !important; color: var(--t-green) !important;
+  font-weight: 600; font-size: .78rem; text-transform: none; letter-spacing: 0;
+  border-bottom: 1px solid var(--t-line);
+}
+th, td { padding: 10px 12px; }
+td { border-bottom: 1px solid var(--t-line) !important; color: var(--t-text); }
+tbody tr:hover td, tr:hover > td, tr.row:hover td, tr.sel td { background: var(--t-light) !important; }
+
+/* ---------- Barras e rankings (feitos em CSS) ---------- */
+.b i, .rk .t i, .rk.op .t i, .bar-fill { background: var(--t-green) !important; }
+.rk .t, .bar-track { background: var(--t-light) !important; }
+.bar-row.active { background: var(--t-light) !important; outline: 1px solid var(--t-green2) !important; }
+.bar-row.active .bar-fill { background: var(--t-green2) !important; }
+.banner.info { background: var(--t-light) !important; border-color: var(--t-soft) !important; }
+
+/* ---------- Mensagens de status ---------- */
+#msg { color: var(--t-green) !important; }
+footer { color: var(--t-muted) !important; }
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 1024px) {
+  body > .row, .controls, .filters { padding: 12px; }
+}
+@media (max-width: 720px) {
+  body { font-size: 13.5px; }
+  body > .row > *, .controls > *, .filters > * { flex: 1 1 140px; }
+  .kpis, .cards { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid, .g2, .g3, .grid2 { grid-template-columns: 1fr !important; }
+  .tw, .tablewrap, .tb { overflow-x: auto; }
+}
+@media (max-width: 440px) {
+  .kpis, .cards { grid-template-columns: 1fr !important; }
+}
+@media print {
+  body > .row, .controls, .filters { display: none !important; }
+}
